@@ -4,8 +4,15 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test-server": "mocha server/tests/**/*.js"
   },
   "author": "Olawale Aladeusi",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^3.2.0"
+  },
+  "dependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
 }
