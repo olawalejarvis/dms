@@ -1,0 +1,11 @@
+{
+  "name": "dms",
+  "version": "1.0.0",
+  "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Olawale Aladeusi",
+  "license": "ISC"
+}
