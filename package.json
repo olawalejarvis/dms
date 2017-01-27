@@ -4,7 +4,7 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha server/tests/**/*.js",
+    "test-server": "mocha server/tests/**/*.js",
     "cover": "istanbul cover _mocha server/tests",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
@@ -12,12 +12,20 @@
   "license": "ISC",
   "devDependencies": {
     "coveralls": "^2.11.15",
+    "eslint": "^3.14.1",
+    "eslint-config-airbnb": "^14.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^3.0.2",
+    "eslint-plugin-react": "^6.9.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "mocha-lcov-reporter": "^1.2.0"
   },
   "dependencies": {
     "chai": "^3.5.0",
+    "eslint-config-airbnb": "^14.0.0",
     "mocha": "^3.2.0"
   }
 }
