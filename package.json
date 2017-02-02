@@ -6,7 +6,8 @@
   "scripts": {
     "test-server": "mocha server/tests/**/*.js",
     "cover": "istanbul cover _mocha server/tests",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "start-dev": "nodemon server"
   },
   "author": "Olawale Aladeusi",
   "license": "ISC",
@@ -21,11 +22,20 @@
     "gulp-babel": "^6.1.2",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
-    "mocha-lcov-reporter": "^1.2.0"
+    "mocha-lcov-reporter": "^1.2.0",
+    "nodemon": "^1.11.0"
   },
   "dependencies": {
+    "body-parser": "^1.16.0",
     "chai": "^3.5.0",
+    "dotenv": "^4.0.0",
     "eslint-config-airbnb": "^14.0.0",
-    "mocha": "^3.2.0"
+    "express": "^4.14.0",
+    "mocha": "^3.2.0",
+    "morgan": "^1.7.0",
+    "pg": "^4.4.3",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.12.2",
+    "sequelize-cli": "^2.1.0"
   }
 }
