@@ -1,8 +1,9 @@
 // This will be our application entry. We'll setup our server here.
-const http = require('http');
-const app = require('./server/config/app'); // The express app we just created
+import http from 'http';
+import * as dotenv from 'dotenv';
+import app from './server/config/app'; // The express app we just created
 
-require('dotenv').config({
+dotenv.config({
   silent: true
 });
 
@@ -11,3 +12,4 @@ app.set('port', port);
 
 const server = http.createServer(app);
 server.listen(port);
+console.log('Running on port ', port);
