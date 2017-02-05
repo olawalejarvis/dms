@@ -1,6 +1,8 @@
-const express = require('express');
-const logger = require('morgan');
-const bodyParser = require('body-parser');
+import express from 'express';
+import logger from 'morgan';
+import bodyParser from 'body-parser';
+import userRouter from './routes/userRoute';
+import docRouter from './routes/documentRoute';
 
 // Set up the express app
 const app = express();
@@ -8,13 +10,11 @@ const app = express();
 // Log requests to the console.
 app.use(logger('dev'));
 
-// Parse incoming requests data
+// Parse incoming requests data, this will happen on every request
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Setup a default catch-all route that sends back a welcome message in JSON format.
-app.get('*', (req, res) => res.status(200).send({
-  message: 'Welcome to document management system.',
-}));
+app.use('/users', userRouter);
+app.use('/documents', docRouter);
 
-module.exports = app;
+export default app;
