@@ -33,7 +33,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     classMethods: {
       associate: (models) => {
-        // associations can be defined here
+        User.hasMany(models.Document, { foreignKey: 'ownerId' });
+        User.belongsTo(models.Role, {
+          foreignKey: 'roleId',
+          onDelete: 'CASCADE'
+        });
       }
     },
     instanceMethods: {
