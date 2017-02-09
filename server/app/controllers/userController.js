@@ -212,7 +212,12 @@ const userCtrl = {
     * @returns {void} no returns
     */
   findUserDocuments(req, res) {
-    res.send('hello find user document');
+    db.User
+      .findAll({ where: { id: req.params.id }, include: [{ model: db.Document }] })
+      .then((user) => {
+        if (!user) { res.send({ message: 'user not found' }); }
+        res.send({ message: user });
+      });
   }
 
 };
