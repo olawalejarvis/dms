@@ -41,9 +41,9 @@ const auth = {
       .findById(req.tokenDecode.roleId)
       .then((role) => {
         if (!role) {
-          return res.send({ Message: 'error' });
+          return res.send({ Message: 'error new error' });
         }
-        if (role.title === 'Admin') {
+        if (role.title === 'admin') {
           next();
         } else { return res.send({ Message: 'permission denied' }); }
       });
