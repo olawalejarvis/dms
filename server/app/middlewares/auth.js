@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import db from '../models/index';
 
+const secretKey = process.env.SECRET || 'funmilayoomomowo';
+
 const auth = {
 
  /**
@@ -14,9 +16,9 @@ const auth = {
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
     if (token) {
       // verifies secret and checks exp
-      jwt.verify(token, 'funmilayoomomowo', (err, decoded) => {
+      jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-          res.send({ success: false });
+          res.status(401).send({ success: false });
         } else {
           // if everything is good, save to request for use in other routes
           req.tokenDecode = decoded;
@@ -25,7 +27,7 @@ const auth = {
       });
     } else {
       // if there is no token
-      res.status(403).send({ success: 'verification failed' });
+      res.status(401).send({ message: 'verification failed' });
     }
   },
 
@@ -41,11 +43,11 @@ const auth = {
       .findById(req.tokenDecode.roleId)
       .then((role) => {
         if (!role) {
-          return res.send({ Message: 'error new error' });
+          return res.status(403).send({ message: 'error new error' });
         }
         if (role.title === 'admin') {
           next();
-        } else { return res.send({ Message: 'permission denied' }); }
+        } else { return res.status(403).send({ message: 'permission denied' }); }
       });
   }
 };

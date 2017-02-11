@@ -1,8 +1,25 @@
 import jwt from 'jsonwebtoken';
 import db from '../models/index';
 
-const userCtrl = {
+const secretKey = process.env.SECRET || 'funmilayoomomowo';
+const defaultValue = 2;
 
+const displayUserAttributes = (user) => {
+  const attributes = {
+    id: user.id,
+    username: user.username,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    email: user.email,
+    RoleId: user.RoleId,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
+
+  return attributes;
+};
+
+const userCtrl = {
   /**
     * Create a new user
     * Route: POST: /users
@@ -18,19 +35,19 @@ const userCtrl = {
         lastname: req.body.lastname,
         email: req.body.email,
         password: req.body.password,
+        roleId: req.body.roleId || defaultValue
       })
       .then((user) => {
         const token = jwt.sign({
           userId: user.id,
           roleId: user.roleId
         },
-          process.env.SECRET, { expiresIn: '365d' }
+          secretKey, { expiresIn: '365d' }
         );
-        res.status(201).send({ message: 'user created', token });
+        user = displayUserAttributes(user);
+        return res.status(201).send({ message: 'user created', token, user });
       })
-      .catch(() => res.status(400).send({
-        message: 'error in creating user'
-      }));
+      .catch(err => res.status(409).send({ message: err.message }));
   },
 
   /**
@@ -47,20 +64,22 @@ const userCtrl = {
           email: req.body.email
         }
       })
-      .then((result) => {
-        if (result && result.validPassword(req.body.password)) {
+      .then((user) => {
+        if (user && user.validPassword(req.body.password)) {
           const token = jwt.sign({
-            userId: result.id,
-            roleId: result.roleId
+            userId: user.id,
+            roleId: user.roleId
           },
-            process.env.SECRET, { expiresIn: '365d' }
+            secretKey, { expiresIn: '365d' }
           );
-          res.send({
+          user = displayUserAttributes(user);
+          return res.status(200).send({
             message: 'login',
-            token
+            token,
+            user
           });
         }
-        res.send({
+        res.status(401).send({
           message: 'failed to login'
         });
       });
@@ -100,11 +119,9 @@ const userCtrl = {
           'updatedAt'
         ]
       })
-      .then((result) => {
-        if (result) {
-          res.send({
-            message: result
-          });
+      .then((users) => {
+        if (users) {
+          res.status(200).send({ message: users });
         }
       });
   },
@@ -121,11 +138,10 @@ const userCtrl = {
       .findById(req.params.id)
       .then((user) => {
         if (user) {
-          res.status(200).send({
-            message: user
-          });
+          user = displayUserAttributes(user);
+          return res.status(200).send({ message: user });
         }
-        res.send({
+        res.status(404).send({
           message: `user with ${req.params.id} not found in the database`
         });
       });
@@ -139,13 +155,13 @@ const userCtrl = {
     * @returns {void} no returns
     */
   updateUserAttribute(req, res) {
-    if (String(req.tokenDecode.userId) !== String(req.params.id)) {
-      return res.send({ message: 'Permission denied' });
-    }
     db.User
       .findById(req.params.id)
       .then((result) => {
         if (result) {
+          if (String(req.tokenDecode.userId) !== String(req.params.id)) {
+            return res.send({ message: 'Permission denied' });
+          }
           result.update({
             username: req.body.username || result.username,
             firstname: req.body.firstname || result.firstname,
@@ -155,7 +171,7 @@ const userCtrl = {
           })
             .then((upUser) => {
               if (upUser) {
-                res.send({
+                res.status(200).send({
                   message: upUser
                 });
               } else {
@@ -165,7 +181,7 @@ const userCtrl = {
               }
             });
         } else {
-          res.send({
+          res.status(404).send({
             message: 'user not found'
           });
         }
@@ -187,7 +203,7 @@ const userCtrl = {
           user.destroy()
             .then((delUser) => {
               if (delUser) {
-                res.send({
+                res.status(200).send({
                   message: 'deleted successfully'
                 });
               } else {
@@ -197,7 +213,7 @@ const userCtrl = {
               }
             });
         } else {
-          res.send({
+          res.status(404).send({
             message: 'id not found'
           });
         }
