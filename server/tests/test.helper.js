@@ -23,6 +23,13 @@ const helper = {
     email: faker.internet.email(),
     password: faker.internet.password(),
   },
+  regularUser2: {
+    username: faker.internet.userName(),
+    firstname: faker.name.firstName(),
+    lastname: faker.name.lastName(),
+    email: faker.internet.email(),
+    password: faker.internet.password()
+  },
   firstUser: {
     username: faker.internet.userName(),
     firstname: faker.name.firstName(),
@@ -37,13 +44,6 @@ const helper = {
     email: faker.internet.email(),
     password: faker.internet.password()
   },
-  thirdUser: {
-    username: faker.internet.userName(),
-    firstname: faker.name.firstName(),
-    lastname: faker.name.lastName(),
-    email: faker.internet.email(),
-    password: faker.internet.password()
-  },
   invalidEmailUser: {
     username: faker.internet.userName(),
     firstname: faker.name.firstName(),
@@ -51,17 +51,17 @@ const helper = {
     email: 'kkkkk',
     password: faker.internet.password()
   },
-  testDocument1: {
+  publicDocument: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),
     access: 'public'
   },
-  testDocument2: {
+  privateDocument: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),
     access: 'private'
   },
-  testDocument3: {
+  roleDocument: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),
     access: 'role'
