@@ -4,7 +4,7 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "index.js",
   "scripts": {
-    "test-server": "mocha server/tests/**/*.js",
+    "test-server": "mocha --compilers js:babel-core/register server/tests/**/*.js",
     "cover": "istanbul cover _mocha server/tests",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "start-dev": "nodemon server",
