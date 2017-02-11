@@ -11,7 +11,7 @@ docRouter.route('/')
 docRouter.route('/:id')
   .get(auth.verifyToken, docCtrl.getDocumentById)
   .put(auth.verifyToken, docCtrl.updateDocumentById)
-  .delete(docCtrl.deteleDocumentById);
+  .delete(auth.verifyToken, docCtrl.deteleDocumentById);
 
 
 export default docRouter;

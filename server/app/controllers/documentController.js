@@ -17,8 +17,8 @@ const docCtrl = {
         ownerId: req.tokenDecode.userId,
         access: req.body.access || 'public'
       })
-       .then(document => res.send({ message: 'created', document }))
-       .catch(error => res.send({ message: 'error', error }));
+       .then(document => res.status(201).send({ message: 'created', document }))
+       .catch(error => res.status(409).send({ message: 'error', error }));
   },
 
   /**
@@ -56,18 +56,18 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { res.send({ message: `no document with id ${req.params.id} found` }); }
+        if (!doc) { return res.send({ message: `no document with id ${req.params.id} found` }); }
         if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId) {
-          res.send({ message: doc });
+          return res.send({ message: doc });
         }
         if (doc.access === 'role') {
           db.User.findById(doc.ownerId)
             .then((user) => {
               if (!user) {
-                res.send({ message: 'no user found' });
+                return res.status(404).send({ message: 'no user found' });
               } else if (user.roleId === req.tokenDecode.roleId) {
-                res.send({ message: doc });
-              } else { res.send({ message: 'permission denied' }); }
+                return res.send({ message: doc });
+              } else { res.status(401).send({ message: 'permission denied' }); }
             });
         }
       });
@@ -84,7 +84,7 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { res.send({ message: `no document with id ${req.params.id} found` }); }
+        if (!doc) { return res.send({ message: `no document with id ${req.params.id} found` }); }
         if (doc.ownerId === req.tokenDecode.userId) {
           doc.update({
             title: req.body.title || doc.title,
@@ -92,10 +92,10 @@ const docCtrl = {
             access: req.body.access || doc.access
           })
           .then((upDoc) => {
-            if (!upDoc) { res.send({ message: `Error in updating document with id ${req.params.id}` }); }
-            res.send({ message: 'successful' });
+            if (!upDoc) { return res.send({ message: `Error in updating document with id ${req.params.id}` }); }
+            return res.status(200).send({ message: 'successful', upDoc });
           });
-        } else { res.send({ message: 'permission denied' }); }
+        } else { res.status(401).send({ message: 'permission denied' }); }
       });
   },
 
@@ -110,16 +110,17 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { res.send({ message: 'no file found' }); }
-        doc.destroy()
-        .then((result) => {
-          if (!result) { res.send({ message: 'something went wrong' }); }
-          res.send({ message: 'document deleted' });
-        });
+        if (!doc) { return res.status(404).send({ message: 'no document found' }); }
+        if (doc.ownerId === req.tokenDecode.userId) {
+          doc.destroy()
+          .then((result) => {
+            if (!result) { res.send({ message: 'something went wrong' }); }
+            return res.status(200).send({ message: 'document deleted' });
+          });
+        } else { res.status(401).send({ message: 'permission denied' }); }
       });
   }
 
 };
-
 
 export default docCtrl;
