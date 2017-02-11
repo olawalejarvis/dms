@@ -5,12 +5,12 @@ import auth from '../../app/middlewares/auth';
 const roleRouter = express.Router();
 
 roleRouter.route('/')
-  .post(auth.varifyToken, auth.hasAdminPermission, roleCtrl.createRole)
-  .get(auth.varifyToken, auth.hasAdminPermission, roleCtrl.getAllRoles);
+  .post(auth.verifyToken, auth.hasAdminPermission, roleCtrl.createRole)
+  .get(auth.verifyToken, auth.hasAdminPermission, roleCtrl.getAllRoles);
 
 roleRouter.route('/:id')
-  .put(auth.varifyToken, auth.hasAdminPermission, roleCtrl.updateRole)
-  .delete(auth.varifyToken, auth.hasAdminPermission, roleCtrl.deleteRole)
-  .get(auth.varifyToken, auth.hasAdminPermission, roleCtrl.getRoleById);
+  .put(auth.verifyToken, auth.hasAdminPermission, roleCtrl.updateRole)
+  .delete(auth.verifyToken, auth.hasAdminPermission, roleCtrl.deleteRole)
+  .get(auth.verifyToken, auth.hasAdminPermission, roleCtrl.getRoleById);
 
 export default roleRouter;

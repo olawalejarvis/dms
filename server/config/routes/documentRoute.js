@@ -5,12 +5,12 @@ import auth from '../../app/middlewares/auth';
 const docRouter = express.Router();
 
 docRouter.route('/')
-  .post(auth.varifyToken, docCtrl.createDocument)
-  .get(auth.varifyToken, docCtrl.getAllDocument);
+  .post(auth.verifyToken, docCtrl.createDocument)
+  .get(auth.verifyToken, docCtrl.getAllDocument);
 
 docRouter.route('/:id')
-  .get(auth.varifyToken, docCtrl.getDocumentById)
-  .put(auth.varifyToken, docCtrl.updateDocumentById)
+  .get(auth.verifyToken, docCtrl.getDocumentById)
+  .put(auth.verifyToken, docCtrl.updateDocumentById)
   .delete(docCtrl.deteleDocumentById);
 
 

@@ -5,7 +5,7 @@ import auth from './../../app/middlewares/auth';
 const userRouter = express.Router();
 
 userRouter.route('/')
-  .get(auth.varifyToken, auth.hasAdminPermission, userCtrl.getAllUser)
+  .get(auth.verifyToken, auth.hasAdminPermission, userCtrl.getAllUser)
   .post(userCtrl.createUser);
 
 userRouter.route('/login')
@@ -15,12 +15,12 @@ userRouter.route('/logout')
   .post(userCtrl.userLogout);
 
 userRouter.route('/:id')
-  .get(auth.varifyToken, userCtrl.getUserById)
-  .put(auth.varifyToken, userCtrl.updateUserAttribute)
-  .delete(auth.varifyToken, auth.hasAdminPermission, userCtrl.deleteUser);
+  .get(auth.verifyToken, userCtrl.getUserById)
+  .put(auth.verifyToken, userCtrl.updateUserAttribute)
+  .delete(auth.verifyToken, auth.hasAdminPermission, userCtrl.deleteUser);
 
 userRouter.route('/:id/documents')
-  .get(auth.varifyToken, userCtrl.findUserDocuments);
+  .get(auth.verifyToken, userCtrl.findUserDocuments);
 
 
 export default userRouter;

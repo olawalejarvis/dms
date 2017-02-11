@@ -12,7 +12,7 @@ const auth = {
    * @param {Object} next move to next controller handler
    * @returns {void} no returns
    */
-  varifyToken(req, res, next) {
+  verifyToken(req, res, next) {
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
     if (token) {
       // verifies secret and checks exp
