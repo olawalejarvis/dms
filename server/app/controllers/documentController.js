@@ -58,18 +58,18 @@ const docCtrl = {
       .then((doc) => {
         if (!doc) { return res.send({ message: `no document with id ${req.params.id} found` }); }
         if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId) {
-          return res.send({ message: doc });
-        }
-        if (doc.access === 'role') {
+          return res.status(200).send({ message: doc });
+        } else if (doc.access === 'role') {
           db.User.findById(doc.ownerId)
             .then((user) => {
               if (!user) {
                 return res.status(404).send({ message: 'no user found' });
               } else if (user.roleId === req.tokenDecode.roleId) {
-                return res.send({ message: doc });
-              } else { res.status(401).send({ message: 'permission denied' }); }
+                return res.status(200).send({ message: doc });
+              }
+              res.status(401).send({ message: 'permission denied' });
             });
-        }
+        } else { res.status(401).send({ message: 'permission denied' }); }
       });
   },
 

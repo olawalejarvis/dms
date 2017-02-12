@@ -125,6 +125,10 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+    after(() => {
+      db.Document.destroy({ where: {} });
+    });
+
     it('should update doucment for owner alone', (done) => {
       const updateDoc = { title: 'andela' };
       superRequest.put(`/documents/${createdDoc.id}`)
@@ -199,8 +203,89 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('Get user by id /documents/:id', () => {
+    after(() => {
+      db.Document.destroy({ where: {} });
+    });
     describe('get user id with access private', () => {
-      
+      let privateDocument;
+      beforeEach((done) => {
+        superRequest.post('/documents')
+          .send(privateD)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            privateDocument = res.body.document;
+            done();
+          });
+      });
+      it('should return document to the owner alone when access level private', (done) => {
+        superRequest.get(`/documents/${privateDocument.id}`)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.message.title).to.equal(privateDocument.title);
+            done();
+          });
+      });
+      it('should not get document when requester is not the owner', (done) => {
+        superRequest.get(`/documents/${privateDocument.id}`)
+          .set({ 'x-access-token': regularToken2 })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body.message).to.equal('permission denied');
+            done();
+          });
+      });
+    });
+    describe('PUBLIC DOCUMENt', () => {
+      let publicDocument;
+      beforeEach((done) => {
+        superRequest.post('/documents')
+          .send(publicD)
+          .set({ 'x-access-token': regularToken2 })
+          .end((err, res) => {
+            publicDocument = res.body.document;
+            done();
+          });
+      });
+      it('should return document if the access level is public', (done) => {
+        superRequest.get(`/documents/${publicDocument.id}`)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.message.title).to.equal(publicDocument.title);
+            done();
+          });
+      });
+    });
+    describe('ROLE ACCESS DOCUMENT', () => {
+      let roleDocument;
+      beforeEach((done) => {
+        superRequest.post('/documents')
+          .send(roleD)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            roleDocument = res.body.document;
+            done();
+          });
+      });
+      it('should return document if the owner and requester are of the same role level', (done) => {
+        superRequest.get(`/documents/${roleDocument.id}`)
+          .set({ 'x-access-token': regularToken2 })
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.message.title).to.equal(roleDocument.title);
+            done();
+          });
+      });
+      it('should not return document if not of the same role id', (done) => {
+        superRequest.get(`/documents/${roleDocument.id}`)
+          .set({ 'x-access-token': adminToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body.message).to.equal('permission denied');
+            done();
+          });
+      });
     });
   });
 });
