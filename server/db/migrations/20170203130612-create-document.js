@@ -15,6 +15,9 @@ module.exports = {
           key: 'id'
         }
       },
+      ownerRoleId: {
+        type: Sequelize.INTEGER
+      },
       access: {
         type: Sequelize.STRING,
         allowNull: false,

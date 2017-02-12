@@ -34,6 +34,11 @@ let regularRole;
 let createdDoc;
 
 describe('DOCUMENT API', () => {
+  let roleDocument;
+  let publicDocument;
+  let privateDocument;
+  let document;
+  let updateDoc;
   before((done) => {
     db.Role.create(adminRoleParams)
       .then((roleA) => {
@@ -78,10 +83,6 @@ describe('DOCUMENT API', () => {
     done();
   });
   describe('CREATE POST /documents', () => {
-    after(() => {
-      db.Document.destroy({ where: {} });
-    });
-
     it('should create a new document successfully', (done) => {
       superRequest.post('/documents')
         .send(publicD)
@@ -116,7 +117,7 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('Update Document /documents/:id', () => {
-    beforeEach((done) => {
+    before((done) => {
       superRequest.post('/documents')
         .send(publicD)
         .set({ 'x-access-token': regularToken })
@@ -125,12 +126,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    after(() => {
-      db.Document.destroy({ where: {} });
-    });
 
     it('should update doucment for owner alone', (done) => {
-      const updateDoc = { title: 'andela' };
+      updateDoc = { title: 'andela' };
       superRequest.put(`/documents/${createdDoc.id}`)
         .send(updateDoc)
         .set({ 'x-access-token': regularToken })
@@ -142,7 +140,7 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should not update document when user is not the owner', (done) => {
-      const updateDoc = { content: 'new life, new culture, new community' };
+      updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put(`/documents/${createdDoc.id}`)
         .send(updateDoc)
         .set({ 'x-access-token': regularToken2 })
@@ -153,7 +151,7 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should not update document when token is not supply', (done) => {
-      const updateDoc = { content: 'new life, new culture, new community' };
+      updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put(`/documents/${createdDoc.id}`)
         .send(updateDoc)
         .end((err, res) => {
@@ -164,7 +162,6 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('Delete Document DELETE /documents/:id', () => {
-    let document;
     beforeEach((done) => {
       superRequest.post('/documents')
         .send(privateD)
@@ -203,12 +200,8 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('Get user by id /documents/:id', () => {
-    after(() => {
-      db.Document.destroy({ where: {} });
-    });
     describe('get user id with access private', () => {
-      let privateDocument;
-      beforeEach((done) => {
+      before((done) => {
         superRequest.post('/documents')
           .send(privateD)
           .set({ 'x-access-token': regularToken })
@@ -237,8 +230,7 @@ describe('DOCUMENT API', () => {
       });
     });
     describe('PUBLIC DOCUMENt', () => {
-      let publicDocument;
-      beforeEach((done) => {
+      before((done) => {
         superRequest.post('/documents')
           .send(publicD)
           .set({ 'x-access-token': regularToken2 })
@@ -258,8 +250,7 @@ describe('DOCUMENT API', () => {
       });
     });
     describe('ROLE ACCESS DOCUMENT', () => {
-      let roleDocument;
-      beforeEach((done) => {
+      before((done) => {
         superRequest.post('/documents')
           .send(roleD)
           .set({ 'x-access-token': regularToken })

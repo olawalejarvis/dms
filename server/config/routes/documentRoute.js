@@ -8,6 +8,8 @@ docRouter.route('/')
   .post(auth.verifyToken, docCtrl.createDocument)
   .get(auth.verifyToken, docCtrl.getAllDocument);
 
+docRouter.get('/search', auth.verifyToken, docCtrl.searchDocument);
+
 docRouter.route('/:id')
   .get(auth.verifyToken, docCtrl.getDocumentById)
   .put(auth.verifyToken, docCtrl.updateDocumentById)
