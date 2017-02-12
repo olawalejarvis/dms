@@ -1,5 +1,18 @@
 import db from '../models/index';
 
+const documentAttributes = (doc) => {
+  const attributes = {
+    id: doc.id,
+    title: doc.title,
+    content: doc.content,
+    access: doc.access,
+    ownerId: doc.ownerId,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt
+  };
+
+  return attributes;
+};
 const docCtrl = {
 
   /**
@@ -15,9 +28,13 @@ const docCtrl = {
         title: req.body.title,
         content: req.body.content,
         ownerId: req.tokenDecode.userId,
-        access: req.body.access || 'public'
+        access: req.body.access || 'public',
+        ownerRoleId: req.tokenDecode.roleId
       })
-       .then(document => res.status(201).send({ message: 'created', document }))
+       .then((document) => {
+         document = documentAttributes(document);
+         res.status(201).send({ message: 'created', document });
+       })
        .catch(error => res.status(409).send({ message: 'error', error }));
   },
 
@@ -33,14 +50,31 @@ const docCtrl = {
       where: {
         $or: [
           { access: 'public' },
-          { ownerId: req.tokenDecode.userId }
+          { ownerId: req.tokenDecode.userId },
+          {
+            $and: [
+              { access: 'role' },
+              { ownerRoleId: req.tokenDecode.roleId }
+            ]
+          }
         ]
-      }
+      },
+      attributes: [
+        'id',
+        'title',
+        'content',
+        'access',
+        'ownerId',
+        'createdAt',
+        'updatedAt'
+      ],
+      limit: req.query.limit || null,
+      offset: req.query.offset || null,
+      order: [['createdAt', 'DESC']]
     };
     db.Document
       .findAll(query)
       .then((docs) => {
-        if (!docs) { res.send({ message: 'can not get all docs' }); }
         res.send({ message: docs });
       });
   },
@@ -56,20 +90,18 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { return res.send({ message: `no document with id ${req.params.id} found` }); }
+        if (!doc) {
+          return res.send({ message: `no document with id ${req.params.id} found` });
+        }
         if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId) {
+          doc = documentAttributes(doc);
           return res.status(200).send({ message: doc });
-        } else if (doc.access === 'role') {
-          db.User.findById(doc.ownerId)
-            .then((user) => {
-              if (!user) {
-                return res.status(404).send({ message: 'no user found' });
-              } else if (user.roleId === req.tokenDecode.roleId) {
-                return res.status(200).send({ message: doc });
-              }
-              res.status(401).send({ message: 'permission denied' });
-            });
-        } else { res.status(401).send({ message: 'permission denied' }); }
+        }
+        if (doc.access === 'role' && doc.ownerRoleId === req.tokenDecode.roleId) {
+          doc = documentAttributes(doc);
+          return res.status(200).send({ message: doc });
+        }
+        res.status(401).send({ message: 'permission denied' });
       });
   },
 
@@ -92,10 +124,15 @@ const docCtrl = {
             access: req.body.access || doc.access
           })
           .then((upDoc) => {
-            if (!upDoc) { return res.send({ message: `Error in updating document with id ${req.params.id}` }); }
+            if (!upDoc) {
+              return res.send({ message: `Error in updating document with id ${req.params.id}` });
+            }
+            upDoc = documentAttributes(upDoc);
             return res.status(200).send({ message: 'successful', upDoc });
           });
-        } else { res.status(401).send({ message: 'permission denied' }); }
+        } else {
+          res.status(401).send({ message: 'permission denied' });
+        }
       });
   },
 
@@ -118,6 +155,48 @@ const docCtrl = {
             return res.status(200).send({ message: 'document deleted' });
           });
         } else { res.status(401).send({ message: 'permission denied' }); }
+      });
+  },
+
+  /**
+    * Search document
+    * Route: GET: /searchs?query={}
+    * @param {Object} req request object
+    * @param {Object} res response object
+    * @returns {void} no returns
+    */
+  searchDocument(req, res) {
+    const query = {
+      where: {
+        $and: [
+          {
+            $or: [
+              { access: 'public' },
+              { ownerId: req.tokenDecode.userId },
+              { $and: [
+                { access: 'role' },
+                { ownerRoleId: req.tokenDecode.roleId }
+              ] }
+            ]
+          }
+        ]
+      },
+      limit: req.query.limit || null,
+      offset: req.query.offset || null,
+      order: [['createdAt', 'DESC']]
+    };
+    if (req.query.query) {
+      query.where.$and.push({
+        $or: [
+          { title: { like: `%${req.query.query}%` } },
+          { content: { like: `%${req.query.query}%` } }
+        ]
+      });
+    }
+    db.Document
+      .findAll(query)
+      .then((docs) => {
+        res.send({ message: docs });
       });
   }
 
