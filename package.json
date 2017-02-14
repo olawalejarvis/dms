@@ -5,14 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test-server": "mocha --compilers js:babel-core/register server/tests/**/*.js",
-    "cover": "istanbul cover _mocha server/tests",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "cover": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha server/tests/**/*.js",
+    "coveralls": "npm run cover && cat ./coverage/lcov.info | coveralls",
     "start-dev": "nodemon server",
     "start": "babel-watch server.js"
   },
   "author": "Olawale Aladeusi",
   "license": "ISC",
   "devDependencies": {
+    "babel-plugin-istanbul": "^4.0.0",
+    "babel-register": "^6.23.0",
     "babel-watch": "^2.0.6",
     "coveralls": "^2.11.15",
     "eslint": "^3.14.1",
@@ -27,9 +29,11 @@
     "mocha": "^3.2.0",
     "mocha-lcov-reporter": "^1.2.0",
     "nodemon": "^1.11.0",
+    "nyc": "^10.1.2",
     "supertest": "^3.0.0"
   },
   "dependencies": {
+    "babel-istanbul": "^0.12.1",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.16.0",
     "chai": "^3.5.0",

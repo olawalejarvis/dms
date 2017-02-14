@@ -75,7 +75,7 @@ const docCtrl = {
     db.Document
       .findAll(query)
       .then((docs) => {
-        res.send({ message: docs });
+        res.status(200).send({ message: docs });
       });
   },
 
@@ -166,6 +166,9 @@ const docCtrl = {
     * @returns {void} no returns
     */
   searchDocument(req, res) {
+    if (!req.query.query) {
+      return res.send({ message: 'enter search query' });
+    }
     const query = {
       where: {
         $and: [
@@ -178,6 +181,12 @@ const docCtrl = {
                 { ownerRoleId: req.tokenDecode.roleId }
               ] }
             ]
+          },
+          {
+            $or: [
+              { title: { like: `%${req.query.query}%` } },
+              { content: { like: `%${req.query.query}%` } }
+            ]
           }
         ]
       },
@@ -185,18 +194,10 @@ const docCtrl = {
       offset: req.query.offset || null,
       order: [['createdAt', 'DESC']]
     };
-    if (req.query.query) {
-      query.where.$and.push({
-        $or: [
-          { title: { like: `%${req.query.query}%` } },
-          { content: { like: `%${req.query.query}%` } }
-        ]
-      });
-    }
     db.Document
       .findAll(query)
       .then((docs) => {
-        res.send({ message: docs });
+        res.status(200).send({ message: docs });
       });
   }
 

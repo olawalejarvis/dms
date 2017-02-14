@@ -1,4 +1,4 @@
-/*
+
 import request from 'supertest';
 import chai from 'chai';
 import app from '../../config/app';
@@ -220,4 +220,4 @@ describe('User API', () => {
     });
   });
 });
-*/
+

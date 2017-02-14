@@ -1,3 +1,4 @@
+
 import request from 'supertest';
 import chai from 'chai';
 import app from '../../config/app';
@@ -14,8 +15,6 @@ const regularParams2 = helper.regularUser2;
 const publicD = helper.publicDocument;
 const privateD = helper.privateDocument;
 const roleD = helper.roleDocument;
-
-const documentArray = helper.documentArray;
 
 const regularRoleParams = helper.testRoleR;
 const adminRoleParams = helper.testRoleA;
@@ -279,4 +278,47 @@ describe('DOCUMENT API', () => {
       });
     });
   });
+  describe('GET ALL DOCUMENT', () => {
+    it('should return all document depending on whether document is public, or private or role', (done) => {
+      superRequest.get('/documents')
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(Array.isArray(res.body.message)).to.be.true;
+          expect(res.body.message.length).to.be.greaterThan(0);
+          done();
+        });
+    });
+    it('should return all document to the owner including private document, any other public or role based document', (done) => {
+      superRequest.get('/documents')
+        .set({ 'x-access-token': regularToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(Array.isArray(res.body.message)).to.be.true;
+          expect(res.body.message.length).to.be.greaterThan(0);
+          done();
+        });
+    });
+    it('should return document if the owner and requester are of the same role level with limit set to 4 and offset set to 2', (done) => {
+      superRequest.get(`/documents?limit=4&offset=2`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(Array.isArray(res.body.message)).to.be.true;
+          expect(res.body.message.length).to.be.greaterThan(0);
+          done();
+        });
+    });
+  });
+  describe('DOCUMENT SEARCH', () => {
+    it('should return search result', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=4&offset=2`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          done();
+        });
+    });
+  });
 });
+

@@ -13,10 +13,10 @@ const roleCtrl = {
     db.Role
       .create({ title: req.body.title })
       .then((role) => {
-        if (!role) { res.send({ message: 'error in creating role' }); }
-        res.send({ message: 'role created successfully' });
+        if (!role) { return res.send({ message: 'error in creating role' }); }
+        res.send({ message: 'role created successfully', role });
       })
-      .catch(error => res.send({ message: error }));
+      .catch(error => res.status(409).send({ message: 'error', error }));
   },
 
   /**
@@ -30,8 +30,8 @@ const roleCtrl = {
     db.Role
       .findAll()
       .then((roles) => {
-        if (!roles) { res.send({ message: 'error in getting roles' }); }
-        res.send({ message: roles });
+        if (!roles) { return res.send({ message: 'error in getting roles' }); }
+        res.status(200).send({ message: roles });
       });
   },
 
@@ -46,10 +46,10 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { res.send({ message: 'error' }); }
+        if (!role) { return res.status(404).send({ message: 'error' }); }
         role.update({ title: req.body.title || role.title })
         .then((upRole) => {
-          if (!upRole) { res.send({ message: 'error in updating' }); }
+          if (!upRole) { return res.send({ message: 'error in updating' }); }
           res.send({ message: upRole });
         });
       });
@@ -66,11 +66,11 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { res.send({ message: 'error' }); }
+        if (!role) { return res.status(404).send({ message: 'error' }); }
         role.destroy()
         .then((del) => {
-          if (!del) { res.send({ message: 'error deleting' }); }
-          res.send({ message: 'role deleted' });
+          if (!del) { return res.send({ message: 'error deleting' }); }
+          res.status(200).send({ message: 'role deleted' });
         });
       });
   },
@@ -86,8 +86,8 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { res.send({ message: 'no role found' }); }
-        res.send({ message: role });
+        if (!role) { return res.status(404).send({ message: 'no role found' }); }
+        res.status(200).send({ message: role });
       });
   }
 };

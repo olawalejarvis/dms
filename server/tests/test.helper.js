@@ -9,6 +9,18 @@ const helper = {
     id: 2,
     title: 'regular'
   },
+  testRoleG: {
+    id: 3,
+    title: 'guest'
+  },
+  testRoleG1: {
+    id: 4,
+    title: 'guest111'
+  },
+  testRoleG2: {
+    id: 5,
+    title: 'guest2'
+  },
   adminUser: {
     username: faker.internet.userName(),
     firstname: faker.name.firstName(),
@@ -69,19 +81,6 @@ const helper = {
   testDocument4: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),
-  },
-  documentArray() {
-    const documentData = [];
-    for (let i = 0; i <= 15; i += 1) {
-      documentData.push({
-        title: faker.company.catchPhrase(),
-        content: faker.lorem.paragraph(),
-        OwnerId: 1
-      });
-    }
-    return documentData;
   }
-
 };
-
 export default helper;
