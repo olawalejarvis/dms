@@ -19,20 +19,19 @@ const roleD = helper.roleDocument;
 const regularRoleParams = helper.testRoleR;
 const adminRoleParams = helper.testRoleA;
 
-let adminToken;
-let regularToken;
-let regularToken2;
-
-let adminUser;
-let regularUser;
-let regularUser2;
-
-let adminRole;
-let regularRole;
-
-let createdDoc;
-
 describe('DOCUMENT API', () => {
+  let adminToken;
+  let regularToken;
+  let regularToken2;
+
+  let adminUser;
+  let regularUser;
+  let regularUser2;
+
+  let adminRole;
+  let regularRole;
+
+  let createdDoc;
   let roleDocument;
   let publicDocument;
   let privateDocument;

@@ -8,10 +8,9 @@
     "start-dev": "nodemon server",
     "start": "babel-watch server.js",
     "migrate": "sequelize db:migrate",
-    "seed": "sequelize db:seed:all",
     "test-server": "NODE_ENV=test mocha --compilers js:babel-core/register server/tests/**/*.js",
-    "cover": "rm -rf coverage/ && NODE_ENV=test babel-node ./node_modules/babel-istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec server/tests/**/*.js",
-    "test": "npm run test-server"
+    "test": "npm run test-server",
+    "cover": "NODE_ENV=test node_modules/babel-cli/bin/babel-node.js node_modules/babel-istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- server/tests/**/*.js"
   },
   "author": "Olawale Aladeusi",
   "license": "ISC",
@@ -38,6 +37,7 @@
   },
   "dependencies": {
     "babel": "^6.5.2",
+    "babel-cli": "^6.23.0",
     "babel-istanbul": "^0.12.1",
     "babel-preset-es2015": "^6.18.0",
     "bcrypt-nodejs": "0.0.3",
