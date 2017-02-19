@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     roleId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultvale: 2
+      defaultValue: 2
     }
   }, {
     classMethods: {
@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         user.generateHash();
       },
       beforeUpdate(user) {
-        if (user._changed.password) {
+        if (user._changed.password) { // check this
           user.generateHash();
         }
       }

@@ -2,6 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Document = sequelize.define('Document', {
     ownerId: {
       type: DataTypes.STRING,
+      allowNull: false
     },
     title: {
       type: DataTypes.STRING,
