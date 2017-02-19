@@ -1,4 +1,3 @@
-
 import request from 'supertest';
 import chai from 'chai';
 import app from '../../config/app';
@@ -45,7 +44,7 @@ describe('User API', () => {
         superRequest.post('/users')
           .send(adminParams)
           .end((err, res) => {
-            expect(res.status).to.equal(409);
+            expect(res.status).to.equal(400);
             done();
           });
       });
@@ -53,7 +52,7 @@ describe('User API', () => {
         superRequest.post('/users')
           .send(helper.invalidEmailUser)
           .end((err, res) => {
-            expect(res.status).to.equal(409);
+            expect(res.status).to.equal(400);
             done();
           });
       });
@@ -82,7 +81,7 @@ describe('User API', () => {
           .end((err, res) => {
             expect(res.status).to.equal(200);
             expect(res.body.token).to.not.equal(null);
-            expect(res.body.message).to.equal('login');
+            expect(res.body.message).to.equal('logged in');
             done();
           });
       });
@@ -111,6 +110,16 @@ describe('User API', () => {
           .end((err, res) => {
             expect(res.status).to.equal(401);
             expect(res.body.message).to.equal('verification failed');
+            done();
+          });
+      });
+      it('should return invalid token if token is invalid', (done) => {
+        superRequest.get('/users')
+          .send(adminParams)
+          .set({ 'x-access-token': 'hello-andela-tia' })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body.message).to.equal('invalid token');
             done();
           });
       });
@@ -161,7 +170,7 @@ describe('User API', () => {
             done();
           });
       });
-      it('should rturn not found for incorrect user id', (done) => {
+      it('should return not found for incorrect user id', (done) => {
         superRequest.get(`/users/2`)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
@@ -172,7 +181,7 @@ describe('User API', () => {
     });
     describe('Update user attributes PUT /users/:id', () => {
       it('it should update the user profile for correct user token', (done) => {
-        const updateData = { username: 'Olawale', lastname: 'Aladeusi' };
+        const updateData = { username: 'Olawale', lastname: 'Aladeusi', password: 'newpassword' };
         superRequest.put(`/users/${adminUser.id}`)
           .send(updateData)
           .set({ 'x-access-token': adminToken })

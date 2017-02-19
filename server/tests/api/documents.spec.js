@@ -109,8 +109,8 @@ describe('DOCUMENT API', () => {
         .send(invalidDoc)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(409);
-          expect(res.body.message).to.equal('error');
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('error in creating document');
           done();
         });
     });
@@ -159,6 +159,17 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+    it('should return id not found for invalid id', (done) => {
+      updateDoc = { content: 'new life, new culture, new community' };
+      superRequest.put('/documents/9999')
+        .send(updateDoc)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(404);
+          expect(res.body.message).to.equal('document not found');
+          done();
+        });
+    });
   });
   describe('Delete Document DELETE /documents/:id', () => {
     beforeEach((done) => {
@@ -198,8 +209,8 @@ describe('DOCUMENT API', () => {
         });
     });
   });
-  describe('Get user by id /documents/:id', () => {
-    describe('get user id with access private', () => {
+  describe('Get document by id /documents/:id', () => {
+    describe('get document\'s id with access private', () => {
       before((done) => {
         superRequest.post('/documents')
           .send(privateD)
@@ -244,6 +255,16 @@ describe('DOCUMENT API', () => {
           .end((err, res) => {
             expect(res.status).to.equal(200);
             expect(res.body.message.title).to.equal(publicDocument.title);
+            expect(res.body.message.access).to.equal('public');
+            done();
+          });
+      });
+      it('should return document not found for invalid id', (done) => {
+        superRequest.get('/documents/99999')
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body.message).to.equal('document not found');
             done();
           });
       });
@@ -264,6 +285,7 @@ describe('DOCUMENT API', () => {
           .end((err, res) => {
             expect(res.status).to.equal(200);
             expect(res.body.message.title).to.equal(roleDocument.title);
+            expect(res.body.message.access).to.equal('role');
             done();
           });
       });
@@ -284,8 +306,9 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.message)).to.be.true;
-          expect(res.body.message.length).to.be.greaterThan(0);
+          res.body.message.forEach((doc) => {
+            expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
+          });
           done();
         });
     });
@@ -316,6 +339,28 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          done();
+        });
+    });
+    it('should return enter search string when no query is entered', (done) => {
+      superRequest.get('/documents/search')
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.body.message).to.equal('enter search query');
+          done();
+        });
+    });
+  });
+  describe('Fetch all user\'s document', () => {
+    it('should return all document created by a particular user', (done) => {
+      superRequest.get(`/users/${regularUser.id}/documents`)
+        .set({ 'x-access-token': regularToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.message[0].Documents.length).to.be.greaterThan(0);
+          res.body.message[0].Documents.forEach((doc) => {
+            expect(doc.ownerId).to.equal(regularUser.id);
+          });
           done();
         });
     });

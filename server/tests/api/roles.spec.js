@@ -32,7 +32,7 @@ describe('ROLE API', () => {
 
   describe('CREATE ROLE POST /roles/', () => {
     describe('ADMIN', () => {
-      it('should allow admin to create role', (done) => {
+      it('should allow admin to create a role', (done) => {
         superRequest.post('/roles')
           .send(regularRoleParams)
           .set({ 'x-access-token': adminToken })
@@ -47,7 +47,7 @@ describe('ROLE API', () => {
           .send(regularRoleParams)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
-            expect(res.status).to.equal(409);
+            expect(res.status).to.equal(400);
             expect(res.body.message).to.equal('error');
             done();
           });
@@ -87,7 +87,7 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('error');
+          expect(res.body.message).to.equal('no role found with this id');
           done();
         });
     });
