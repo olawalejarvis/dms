@@ -42,12 +42,12 @@ const userCtrl = {
           userId: user.id,
           roleId: user.roleId
         },
-          secretKey, { expiresIn: '365d' }
+          secretKey, { expiresIn: '7d' }
         );
         user = displayUserAttributes(user);
         return res.status(201).send({ message: 'user created', token, user });
       })
-      .catch(err => res.status(409).send({ message: err.message }));
+      .catch(err => res.status(400).send({ message: err.message }));
   },
 
   /**
@@ -70,11 +70,11 @@ const userCtrl = {
             userId: user.id,
             roleId: user.roleId
           },
-            secretKey, { expiresIn: '365d' }
+            secretKey, { expiresIn: '7d' }
           );
           user = displayUserAttributes(user);
           return res.status(200).send({
-            message: 'login',
+            message: 'logged in',
             token,
             user
           });
@@ -93,8 +93,8 @@ const userCtrl = {
     * @returns {void} no returns
     */
   userLogout(req, res) {
-    res.send({
-      message: 'hello logout'
+    res.status(200).send({
+      message: 'logged out'
     });
   },
 
@@ -169,16 +169,9 @@ const userCtrl = {
             email: req.body.email || result.email,
             password: req.body.password || result.password
           })
-            .then((upUser) => {
-              if (upUser) {
-                res.status(200).send({
-                  message: upUser
-                });
-              } else {
-                res.send({
-                  message: 'unable to update'
-                });
-              }
+            .then((updatedUser) => {
+              updatedUser = displayUserAttributes(updatedUser);
+              res.status(200).send({ message: updatedUser });
             });
         } else {
           res.status(404).send({
@@ -201,20 +194,14 @@ const userCtrl = {
       .then((user) => {
         if (user) {
           user.destroy()
-            .then((delUser) => {
-              if (delUser) {
-                res.status(200).send({
-                  message: 'deleted successfully'
-                });
-              } else {
-                res.send({
-                  message: 'unable to delete user'
-                });
-              }
+            .then(() => {
+              res.status(200).send({
+                message: 'deleted successfully'
+              });
             });
         } else {
           res.status(404).send({
-            message: 'id not found'
+            message: 'User not found'
           });
         }
       });
@@ -231,8 +218,8 @@ const userCtrl = {
     db.User
       .findAll({ where: { id: req.params.id }, include: [{ model: db.Document }] })
       .then((user) => {
-        if (!user) { res.send({ message: 'user not found' }); }
-        res.send({ message: user });
+        if (!user) { return res.status(404).send({ message: 'user not found' }); }
+        res.status(200).send({ message: user });
       });
   }
 

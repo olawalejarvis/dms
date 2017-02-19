@@ -18,15 +18,13 @@ const auth = {
       // verifies secret and checks exp
       jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-          res.status(401).send({ success: false });
+          res.status(401).send({ message: 'invalid token' });
         } else {
-          // if everything is good, save to request for use in other routes
           req.tokenDecode = decoded;
           next();
         }
       });
     } else {
-      // if there is no token
       res.status(401).send({ message: 'verification failed' });
     }
   },
@@ -42,9 +40,6 @@ const auth = {
     db.Role
       .findById(req.tokenDecode.roleId)
       .then((role) => {
-        if (!role) {
-          return res.status(403).send({ message: 'error new error' });
-        }
         if (role.title === 'admin') {
           next();
         } else { return res.status(403).send({ message: 'permission denied' }); }
