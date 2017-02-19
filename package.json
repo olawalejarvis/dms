@@ -4,15 +4,19 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "index.js",
   "scripts": {
-    "test-server": "mocha --compilers js:babel-core/register server/tests/**/*.js",
-    "cover": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha server/tests/**/*.js",
-    "coveralls": "npm run cover && cat ./coverage/lcov.info | coveralls",
+    "coveralls": "npm run cover-server && cat ./coverage/lcov.info | coveralls",
     "start-dev": "nodemon server",
-    "start": "babel-watch server.js"
+    "start": "babel-watch server.js",
+    "cover-server": "NODE_ENV=test node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/_mocha -- server/tests/**/*.js",
+    "migrate-test": "NODE_ENV=test sequelize db:migrate",
+    "db:seeder": "sequelize db:seeder:all",
+    "test-server": "NODE_ENV=test mocha --compilers js:babel-core/register server/tests/**/*.js",
+    "test": "npm run test-server"
   },
   "author": "Olawale Aladeusi",
   "license": "ISC",
   "devDependencies": {
+    "babel-istanbul": "^0.12.1",
     "babel-plugin-istanbul": "^4.0.0",
     "babel-register": "^6.23.0",
     "babel-watch": "^2.0.6",
