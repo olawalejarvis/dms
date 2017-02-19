@@ -21,12 +21,17 @@ const helper = {
     id: 5,
     title: 'guest2'
   },
+  testRoleSample: {
+    id: 7,
+    title: 'guestSample'
+  },
   adminUser: {
     username: faker.internet.userName(),
     firstname: faker.name.firstName(),
     lastname: faker.name.lastName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
+    roleId: 1
   },
   regularUser: {
     username: faker.internet.userName(),

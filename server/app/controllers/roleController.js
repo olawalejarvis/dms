@@ -10,8 +10,12 @@ const roleCtrl = {
     * @returns {void} no returns
     */
   createRole(req, res) {
+    let roleData = {};
+    if (req.body.id) {
+      roleData = { title: req.body.title, id: req.body.id };
+    } else { roleData = { title: req.body.title }; }
     db.Role
-      .create({ title: req.body.title })
+      .create(roleData)
       .then((role) => {
         res.status(200).send({ message: 'role created successfully', role });
       })
