@@ -6,7 +6,8 @@
   "scripts": {
     "coveralls": "npm run cover && cat ./coverage/lcov.info | coveralls",
     "start-dev": "nodemon server",
-    "start": "babel-watch server.js",
+    "develop-server": "babel-watch server.js",
+    "start": "babel-node server.js",
     "migrate": "sequelize db:migrate",
     "test-server": "NODE_ENV=test mocha --compilers js:babel-core/register server/tests/**/*.js",
     "test": "npm run test-server",
@@ -17,8 +18,6 @@
   "devDependencies": {
     "babel-istanbul": "^0.12.1",
     "babel-plugin-istanbul": "^4.0.0",
-    "babel-register": "^6.23.0",
-    "babel-watch": "^2.0.6",
     "coveralls": "^2.11.15",
     "eslint": "^3.14.1",
     "eslint-config-airbnb": "^14.0.0",
@@ -36,6 +35,8 @@
     "supertest": "^3.0.0"
   },
   "dependencies": {
+    "babel-register": "^6.23.0",
+    "babel-watch": "^2.0.6",
     "babel": "^6.5.2",
     "babel-cli": "^6.23.0",
     "babel-istanbul": "^0.12.1",
