@@ -202,6 +202,16 @@ describe('User API', () => {
             done();
           });
       });
+      it('should return permission denied when user want to edit another person\'s profile', (done) => {
+        const data = { username: 'wale', lastname: 'ala' };
+        superRequest.put(`/users/${adminUser.id}`)
+          .send(data)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            done();
+          });
+      });
     });
     describe('Delete user DELETE /users/:id', () => {
       it('delete user with valid id ', (done) => {

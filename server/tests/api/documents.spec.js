@@ -356,10 +356,36 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message[0].Documents.length).to.be.greaterThan(0);
-          res.body.message[0].Documents.forEach((doc) => {
+          expect(res.body.id).to.equal(regularUser.id);
+          expect(res.body.email).to.equal(regularUser.email);
+          expect(res.body.Documents.length).to.be.greaterThan(0);
+          res.body.Documents.forEach((doc) => {
             expect(doc.ownerId).to.equal(regularUser.id);
           });
+          done();
+        });
+    });
+    it('should return all document created by a particular user to admin user', (done) => {
+      superRequest.get(`/users/${regularUser.id}/documents`)
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.id).to.equal(regularUser.id);
+          expect(res.body.email).to.equal(regularUser.email);
+          expect(res.body.Documents.length).to.be.greaterThan(0);
+          res.body.Documents.forEach((doc) => {
+            expect(doc.ownerId).to.equal(regularUser.id);
+            expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
+          });
+          done();
+        });
+    });
+    it('should return no document found for invalid id', (done) => {
+      superRequest.get('/users/0/documents')
+        .set({ 'x-access-token': regularToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(404);
+          expect(res.body.message).to.equal('no document found');
           done();
         });
     });

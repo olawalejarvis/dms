@@ -160,7 +160,7 @@ const userCtrl = {
       .then((result) => {
         if (result) {
           if (String(req.tokenDecode.userId) !== String(req.params.id)) {
-            return res.send({ message: 'Permission denied' });
+            return res.status(401).send({ message: 'Permission denied' });
           }
           result.update({
             username: req.body.username || result.username,
@@ -215,11 +215,38 @@ const userCtrl = {
     * @returns {void} no returns
     */
   findUserDocuments(req, res) {
+    let query;
+    if (req.tokenDecode.roleId === 1) {
+      query = {};
+    } else {
+      query = {
+        $or: [
+          { access: 'public' },
+          { ownerId: req.tokenDecode.userId },
+          {
+            $and: [
+              { access: 'role' },
+              { ownerRoleId: req.tokenDecode.roleId }
+            ]
+          }
+        ]
+      };
+    }
     db.User
-      .findAll({ where: { id: req.params.id }, include: [{ model: db.Document }] })
-      .then((user) => {
-        if (!user) { return res.status(404).send({ message: 'user not found' }); }
-        res.status(200).send({ message: user });
+      .findAll({
+        where: { id: req.params.id },
+        include: [{ model: db.Document, where: query }],
+        attributes: [
+          'id',
+          'username',
+          'firstname',
+          'lastname',
+          'email'
+        ]
+      })
+      .then((userDoc) => {
+        if (userDoc.length === 0) { return res.status(404).send({ message: 'no document found' }); }
+        res.status(200).send(userDoc[0]);
       });
   }
 
