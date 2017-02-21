@@ -101,7 +101,7 @@ const docCtrl = {
         if (!doc) {
           return res.status(404).send({ message: 'document not found' });
         }
-        if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId) {
+        if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
           doc = documentAttributes(doc);
           return res.status(200).send({ message: doc });
         }
@@ -125,7 +125,7 @@ const docCtrl = {
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'document not found' }); }
-        if (doc.ownerId === req.tokenDecode.userId) {
+        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
           doc.update({
             title: req.body.title || doc.title,
             content: req.body.content || doc.content,
@@ -153,7 +153,7 @@ const docCtrl = {
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'no document found' }); }
-        if (doc.ownerId === req.tokenDecode.userId) {
+        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
           doc.destroy()
           .then(() => res.status(200).send({ message: 'document deleted' }));
         } else { res.status(401).send({ message: 'permission denied' }); }
@@ -192,8 +192,8 @@ const docCtrl = {
           }
         ]
       },
-      limit: req.query.limit || null,
-      offset: req.query.offset || null,
+      limit: req.query.limit || 20,
+      offset: req.query.offset || 10,
       order: [['createdAt', 'DESC']]
     };
     db.Document

@@ -20,23 +20,16 @@ const regularRoleParams = helper.testRoleR;
 const adminRoleParams = helper.testRoleA;
 
 describe('DOCUMENT API', () => {
-  let adminToken;
-  let regularToken;
-  let regularToken2;
+  let adminToken, regularToken, regularToken2;
 
-  let adminUser;
-  let regularUser;
-  let regularUser2;
+  let adminUser, regularUser, regularUser2;
 
-  let adminRole;
-  let regularRole;
+  let adminRole, regularRole;
 
-  let createdDoc;
-  let roleDocument;
-  let publicDocument;
-  let privateDocument;
-  let document;
-  let updateDoc;
+  let createdDoc, roleDocument, publicDocument, privateDocument;
+
+  let document, updateDoc;
+
   before((done) => {
     db.Role.create(adminRoleParams)
       .then((roleA) => {
@@ -81,7 +74,7 @@ describe('DOCUMENT API', () => {
     done();
   });
   describe('CREATE POST /documents', () => {
-    it('should create a new document successfully', (done) => {
+    it('should create a new document', (done) => {
       superRequest.post('/documents')
         .send(publicD)
         .set({ 'x-access-token': regularToken })
@@ -208,8 +201,8 @@ describe('DOCUMENT API', () => {
         });
     });
   });
-  describe('Get document by id /documents/:id', () => {
-    describe('get document\'s id with access private', () => {
+  describe('GET document /documents/:id', () => {
+    describe('GET document with access PRIVATE', () => {
       before((done) => {
         superRequest.post('/documents')
           .send(privateD)
@@ -219,7 +212,7 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
-      it('should return document to the owner alone when access level private', (done) => {
+      it('should return document to the owner alone when document\'s access level is private', (done) => {
         superRequest.get(`/documents/${privateDocument.id}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
@@ -269,13 +262,23 @@ describe('DOCUMENT API', () => {
       });
     });
     describe('ROLE ACCESS DOCUMENT', () => {
+      let guestToken;
       before((done) => {
-        superRequest.post('/documents')
-          .send(roleD)
-          .set({ 'x-access-token': regularToken })
-          .end((err, res) => {
-            roleDocument = res.body.document;
-            done();
+        db.Role.create(helper.testRoleG)
+          .then((guestRole) => {
+            helper.secondUser.roleId = guestRole.id;
+            superRequest.post('/users')
+              .send(helper.secondUser)
+              .end((error, response) => {
+                guestToken = response.body.token;
+                superRequest.post('/documents')
+                  .send(roleD)
+                  .set({ 'x-access-token': regularToken })
+                  .end((err, res) => {
+                    roleDocument = res.body.document;
+                    done();
+                  });
+              });
           });
       });
       it('should return document if the owner and requester are of the same role level', (done) => {
@@ -290,7 +293,7 @@ describe('DOCUMENT API', () => {
       });
       it('should not return document if not of the same role id', (done) => {
         superRequest.get(`/documents/${roleDocument.id}`)
-          .set({ 'x-access-token': adminToken })
+          .set({ 'x-access-token': guestToken })
           .end((err, res) => {
             expect(res.status).to.equal(401);
             expect(res.body.message).to.equal('permission denied');
@@ -300,7 +303,7 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('GET ALL DOCUMENT', () => {
-    it('should return all document depending on whether document is public, or private or role', (done) => {
+    it('should return all documents to admin user', (done) => {
       superRequest.get('/documents')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
@@ -311,21 +314,19 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all document to the owner including private document, any other public or role based document', (done) => {
-      superRequest.get('/documents')
-        .set({ 'x-access-token': regularToken })
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body.message.length).to.be.greaterThan(0);
-          done();
-        });
-    });
-    it('should return document if the owner and requester are of the same role level with limit set to 4 and offset set to 2', (done) => {
+    it('should return all documents created by the user and documents with access level public or role with limit set to 4 and offset set to 2', (done) => {
       superRequest.get('/documents?limit=4&offset=2')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message.length).to.be.greaterThan(0);
+          expect(res.body.message.length).to.equal(4);
+          res.body.message.forEach((doc) => {
+            if (doc.ownerId === regularUser2.id) {
+              expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
+            } else {
+              expect(doc.access).to.be.oneOf(['role', 'public']);
+            }
+          });
           done();
         });
     });
@@ -336,6 +337,22 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          res.body.message.forEach((doc) => {
+            if (doc.ownerId === regularUser2.id) {
+              expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
+            } else { expect(doc.access).to.be.oneOf(['public', 'role']); }
+          });
+          done();
+        });
+    });
+    it('should return all search results to admin', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=4&offset=2`)
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          res.body.message.forEach((doc) => {
+            expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
+          });
           done();
         });
     });
@@ -349,7 +366,7 @@ describe('DOCUMENT API', () => {
     });
   });
   describe('Fetch all user\'s document', () => {
-    it('should return all document created by a particular user', (done) => {
+    it('should return all documents created by a particular user', (done) => {
       superRequest.get(`/users/${regularUser.id}/documents`)
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
@@ -363,7 +380,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all document created by a particular user to admin user', (done) => {
+    it('should return all documents created by a particular user to admin user', (done) => {
       superRequest.get(`/users/${regularUser.id}/documents`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {

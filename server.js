@@ -1,8 +1,8 @@
-// This will be our application entry. We'll setup our server here.
+// This is dms application entry point.
 import http from 'http';
 import * as dotenv from 'dotenv';
 import logger from 'js-logger';
-import app from './server/config/app'; // The express app we just created
+import app from './server/config/app';
 
 dotenv.config({
   silent: true
