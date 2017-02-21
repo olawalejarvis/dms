@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/andela-oaladeusi/dms/badge.svg?branch=staging)](https://coveralls.io/github/andela-oaladeusi/dms?branch=staging) [![Build Status](https://travis-ci.org/andela-oaladeusi/dms.svg?branch=master)](https://travis-ci.org/andela-oaladeusi/dms)
+[![Coverage Status](https://coveralls.io/repos/github/andela-oaladeusi/dms/badge.svg?branch=staging)](https://coveralls.io/github/andela-oaladeusi/dms?branch=staging) [![Build Status](https://travis-ci.org/andela-oaladeusi/dms.svg?branch=master)](https://travis-ci.org/andela-oaladeusi/dms) [![Code Climate](https://codeclimate.com/repos/58ac1f917dc061005e007268/badges/aa2cf7e31c3bdcb34278/gpa.svg)](https://codeclimate.com/repos/58ac1f917dc061005e007268/feed)
 
 # Document Management System
 The Document management system provides REST API enpoints for a document management system. It allows create, retrieve, update and delete actions to be carried out.
