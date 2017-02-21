@@ -5,10 +5,15 @@ The Document management system provides REST API enpoints for a document managem
 It also ensures that users are authorized.
 
 ## Development
-Document Management System API is built with JavaScript (ES6), [NodeJs](https://nodejs.org), Express, Postgresql and Sequelize ORM.
+Document Management System API is built with the following technologies;
+- JavaScript (ES6)
+- [NodeJs](https://nodejs.org)
+- [Express](http://expressjs.com/)
+- [Postgresql](https://www.postgresql.org/)
+- [Sequelize ORM](http://docs.sequelizejs.com/en/v3/)
 
 ## Installation
-- Ensure that you have NodeJs and Postgres installed on your machine
+- Install [NodeJs](https://nodejs.org/en/) and [Postgres](https://www.postgresql.org/) on your machine
 - Clone the repository `$ git clone https://github.com/andela-oaladeusi/dms.git`
 - Change into the directory `$ cd /dms`
 - Install all required dependencies with `$ npm install`
@@ -24,25 +29,28 @@ Document Management System API is built with JavaScript (ES6), [NodeJs](https://
 **Users**:
 A created user will have a role, either an admin or a regular.
 - A Regular User can:
-    - Create an account
-    - Login
-    - Create a document
+    - Create an account `POST /users`
+    - Login `POST /users`
+    - Edit his profile.
+    - Logout.
+    - Create a document `POST /documents`
+    - Edit a document `PUT /documents/:id`
+    - Retrieve a document `GET /documents/:id`
+    - Delete a document `DELETE /documents/:id`
     - Limit access to a document by specifying an access group `i.e. public, private or role`.
     - View public documents created by other users.
     - View documents created by his access group with access level set as `role`.
-    - Edit his profile.
     - Search a users public documents.
     - View `public` and `role` access level documents of other regular users.
-    - Logout.
 
 - An Admin User can:
-    - View all users.
-    - View all created documents.
-    - Delete any user.
-    - Update any user's record.
-    - Create a new role.
-    - View all created roles.
-    - Search for any user.
+    - View all users `GET /users`
+    - View all created documents `GET /documents`
+    - Delete any user `DELETE /users/:id`
+    - Update any user's record `PUT /users/:id`
+    - Create a new role `POST /roles`
+    - View all created roles `GET /roles`
+    - Search for any user `GET /users/:id`
 
 **Documents**:
 Documents can be created and must have:
@@ -60,7 +68,6 @@ By generating a token on registration and login, API endpoints and documents are
 Requests to protected routes are validated using the generated token.
 
 ## Endpoints
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2)
 
 **Users**
 

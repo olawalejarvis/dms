@@ -316,17 +316,15 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.message)).to.be.true;
           expect(res.body.message.length).to.be.greaterThan(0);
           done();
         });
     });
     it('should return document if the owner and requester are of the same role level with limit set to 4 and offset set to 2', (done) => {
-      superRequest.get(`/documents?limit=4&offset=2`)
+      superRequest.get('/documents?limit=4&offset=2')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.message)).to.be.true;
           expect(res.body.message.length).to.be.greaterThan(0);
           done();
         });

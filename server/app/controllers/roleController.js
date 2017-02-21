@@ -10,12 +10,8 @@ const roleCtrl = {
     * @returns {void} no returns
     */
   createRole(req, res) {
-    let roleData = {};
-    if (req.body.id) {
-      roleData = { title: req.body.title, id: req.body.id };
-    } else { roleData = { title: req.body.title }; }
     db.Role
-      .create(roleData)
+      .create(req.body)
       .then((role) => {
         res.status(200).send({ message: 'role created successfully', role });
       })
@@ -33,7 +29,6 @@ const roleCtrl = {
     db.Role
       .findAll()
       .then((roles) => {
-        if (!roles) { return res.status(404).send({ message: 'error in getting roles' }); }
         res.status(200).send({ message: roles });
       });
   },
