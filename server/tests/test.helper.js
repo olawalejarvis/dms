@@ -68,6 +68,14 @@ const helper = {
     email: 'kkkkk',
     password: faker.internet.password()
   },
+  invalidPasswordUser: {
+    username: faker.internet.userName(),
+    firstname: faker.name.firstName(),
+    lastname: faker.name.lastName(),
+    email: faker.internet.email(),
+    password: 'ola',
+    roleId: 1
+  },
   publicDocument: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),

@@ -5,19 +5,19 @@ import auth from './../../app/middlewares/auth';
 const userRouter = express.Router();
 
 userRouter.route('/')
-  .get(auth.verifyToken, auth.hasAdminPermission, userCtrl.getAllUser)
-  .post(userCtrl.createUser);
+  .get(auth.verifyToken, auth.hasAdminPermission, userCtrl.getAll)
+  .post(userCtrl.create);
 
 userRouter.route('/login')
-  .post(userCtrl.userLogin);
+  .post(userCtrl.login);
 
 userRouter.route('/logout')
-  .post(userCtrl.userLogout);
+  .post(userCtrl.logout);
 
 userRouter.route('/:id')
-  .get(auth.verifyToken, userCtrl.getUserById)
-  .put(auth.verifyToken, userCtrl.updateUserAttribute)
-  .delete(auth.verifyToken, auth.hasAdminPermission, userCtrl.deleteUser);
+  .get(auth.verifyToken, userCtrl.getUser)
+  .put(auth.verifyToken, userCtrl.update)
+  .delete(auth.verifyToken, auth.hasAdminPermission, userCtrl.delete);
 
 userRouter.route('/:id/documents')
   .get(auth.verifyToken, userCtrl.findUserDocuments);

@@ -36,7 +36,7 @@ describe('User API', () => {
             expect(response.body.user.username).to.equal(adminParams.username);
             expect(response.body.user.firstname).to.equal(adminParams.firstname);
             expect(response.body.user.lastname).to.equal(adminParams.lastname);
-            expect(response.body.user.roleId).to.not.equal(adminParams.roleId);
+            expect(response.body.user.roleId).to.equal(adminParams.roleId);
             done();
           });
       });
@@ -44,7 +44,8 @@ describe('User API', () => {
         superRequest.post('/users')
           .send(adminParams)
           .end((err, res) => {
-            expect(res.status).to.equal(400);
+            expect(res.status).to.equal(500);
+            expect(res.body[0].type).to.equal('unique violation');
             done();
           });
       });
@@ -52,7 +53,20 @@ describe('User API', () => {
         superRequest.post('/users')
           .send(helper.invalidEmailUser)
           .end((err, res) => {
-            expect(res.status).to.equal(400);
+            expect(res.status).to.equal(500);
+            expect(res.body[0].message).to.equal('input a valid email address');
+            expect(res.body[0].type).to.equal('Validation error');
+            expect(res.body[0].path).to.equal('email');
+            done();
+          });
+      });
+      it('should fail if password is less than 8', (done) => {
+        superRequest.post('/users')
+          .send(helper.invalidPasswordUser)
+          .end((err, res) => {
+            expect(res.status).to.equal(500);
+            expect(res.body[0].message).to.equal('Minimum of of 8 characters is required');
+            expect(res.body[0].type).to.equal('Validation error');
             done();
           });
       });
@@ -99,6 +113,16 @@ describe('User API', () => {
           .send({ email: adminParams.email, password: 'invalid' })
           .end((err, res) => {
             expect(res.status).to.equal(401);
+            expect(res.body.message).to.equal('User varification failed');
+            done();
+          });
+      });
+      it('should not allow login with when email or password is not provided', (done) => {
+        superRequest.post('/users/login')
+          .send({ })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body.message).to.equal('User varification failed');
             done();
           });
       });
@@ -146,8 +170,8 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(Array.isArray(res.body.message)).to.be.true;
-            expect(res.body.message.length).to.be.greaterThan(0);
+            expect(res.body.users.length).to.be.greaterThan(0);
+            expect(res.body.message).to.equal('success');
             done();
           });
       });
@@ -165,8 +189,10 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.not.equal(null);
-            expect(res.body.message.id).to.equal(adminUser.id);
+            expect(res.body.user).to.not.equal(null);
+            expect(res.body.user.id).to.equal(adminUser.id);
+            expect(res.body.user.email).to.equal(adminUser.email);
+            expect(res.body.user.password).to.not.exist;
             done();
           });
       });
@@ -187,8 +213,9 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message.username).to.equal('Olawale');
-            expect(res.body.message.lastname).to.equal('Aladeusi');
+            expect(res.body.message).to.equal('success');
+            expect(res.body.updatedUser.username).to.equal('Olawale');
+            expect(res.body.updatedUser.lastname).to.equal('Aladeusi');
             done();
           });
       });
@@ -239,4 +266,3 @@ describe('User API', () => {
     });
   });
 });
-

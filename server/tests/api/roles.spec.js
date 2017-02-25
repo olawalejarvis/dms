@@ -12,7 +12,7 @@ const adminParams = helper.firstUser;
 const adminRoleParams = helper.testRoleA;
 const regularRoleParams = helper.testRoleR;
 
-let adminToken;
+let adminToken, reguToken;
 let role;
 
 describe('ROLE API', () => {
@@ -47,8 +47,19 @@ describe('ROLE API', () => {
           .send(regularRoleParams)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
-            expect(res.status).to.equal(400);
-            expect(res.body.message).to.equal('error');
+            expect(res.status).to.equal(500);
+            expect(res.body[0].type).to.equal('unique violation');
+            done();
+          });
+      });
+      it('should return error when no title is set by admin', (done) => {
+        superRequest.post('/roles')
+          .send({ title: '' })
+          .set({ 'x-access-token': adminToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(500);
+            expect(res.body[0].type).to.equal('Validation error');
+            expect(res.body[1].message).to.equal('This field cannot be empty');
             done();
           });
       });
@@ -59,6 +70,21 @@ describe('ROLE API', () => {
             expect(res.status).to.equal(401);
             expect(res.body.message).to.equal('verification failed');
             done();
+          });
+      });
+      it('should not allow regular user to create a role', (done) => {
+        superRequest.post('/users')
+          .send(helper.regularUser2)
+          .end((err, res) => {
+            reguToken = res.body.token;
+            superRequest.post('/roles')
+              .send(helper.testRoleSample)
+              .set({ 'x-access-token': reguToken })
+              .end((er, re) => {
+                expect(re.status).to.equal(403);
+                expect(re.body.message).to.equal('permission denied');
+                done();
+              });
           });
       });
     });
@@ -82,12 +108,21 @@ describe('ROLE API', () => {
           done();
         });
     });
+    it('should not allow regular user to delete a role', (done) => {
+      superRequest.get(`/roles/${role.id}`)
+        .set({ 'x-access-token': reguToken })
+        .end((er, re) => {
+          expect(re.status).to.equal(403);
+          expect(re.body.message).to.equal('permission denied');
+          done();
+        });
+    });
     it('should return id not found for invalid id', (done) => {
       superRequest.delete('/roles/3')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('no role found with this id');
+          expect(res.body.message).to.equal('role not found');
           done();
         });
     });
@@ -107,6 +142,17 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.message).to.equal('success');
+          expect(res.body.role.title).to.equal(role.title);
+          done();
+        });
+    });
+    it('should not allow regular user to get role', (done) => {
+      superRequest.get(`/roles/${role.id}`)
+        .set({ 'x-access-token': reguToken })
+        .end((er, re) => {
+          expect(re.status).to.equal(403);
+          expect(re.body.message).to.equal('permission denied');
           done();
         });
     });
@@ -115,6 +161,7 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
+          expect(res.body.message).to.equal('role not found');
           done();
         });
     });
@@ -136,6 +183,17 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((er, re) => {
           expect(re.status).to.equal(200);
+          expect(re.body.message).to.equal('success');
+          expect(re.body.updatedRole.title).to.equal('andela');
+          done();
+        });
+    });
+    it('should not allow regular user to update role', (done) => {
+      superRequest.get(`/roles/${newRole.id}`)
+        .set({ 'x-access-token': reguToken })
+        .end((er, re) => {
+          expect(re.status).to.equal(403);
+          expect(re.body.message).to.equal('permission denied');
           done();
         });
     });
@@ -145,6 +203,7 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((error, resp) => {
           expect(resp.status).to.equal(404);
+          expect(resp.body.message).to.equal('role not found');
           done();
         });
     });
@@ -161,8 +220,17 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.message)).to.be.true;
-          expect(res.body.message.length).to.be.greaterThan(0);
+          expect(res.body.message).to.be.equal('success');
+          expect(res.body.roles.length).to.be.greaterThan(0);
+          done();
+        });
+    });
+    it('should not allow regular user to get all role', (done) => {
+      superRequest.get('/roles')
+        .set({ 'x-access-token': reguToken })
+        .end((er, re) => {
+          expect(re.status).to.equal(403);
+          expect(re.body.message).to.equal('permission denied');
           done();
         });
     });
