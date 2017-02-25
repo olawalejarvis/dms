@@ -6,18 +6,34 @@ module.exports = (sequelize, DataTypes) => {
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'This field cannot be empty'
+        }
+      }
     },
     content: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'This field cannot be empty'
+        }
+      }
     },
     access: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'public',
       validate: {
-        isIn: [['public', 'private', 'role']]
+        isIn: [['public', 'private', 'role']],
+        notEmpty: {
+          args: true,
+          msg: 'This field cannot be empty'
+        }
       }
     },
     ownerRoleId: {
