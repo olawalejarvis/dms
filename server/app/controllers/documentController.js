@@ -1,18 +1,7 @@
 import db from '../models/index';
 
-const documentAttributes = (doc) => {
-  const attributes = {
-    id: doc.id,
-    title: doc.title,
-    content: doc.content,
-    access: doc.access,
-    ownerId: doc.ownerId,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt
-  };
+const isAdmin = 1;
 
-  return attributes;
-};
 const docCtrl = {
 
   /**
@@ -22,20 +11,19 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  createDocument(req, res) {
+  create(req, res) {
     db.Document
       .create({
         title: req.body.title,
         content: req.body.content,
         ownerId: req.tokenDecode.userId,
-        access: req.body.access || 'public',
+        access: req.body.access,
         ownerRoleId: req.tokenDecode.roleId
       })
        .then((document) => {
-         document = documentAttributes(document);
-         res.status(201).send({ message: 'created', document });
+         res.status(201).send({ message: 'success', document });
        })
-       .catch(error => res.status(400).send({ message: 'error in creating document', error }));
+       .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -45,9 +33,9 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getAllDocument(req, res) {
+  getAll(req, res) {
     let query;
-    if (req.tokenDecode.roleId === 1) {
+    if (req.tokenDecode.roleId === isAdmin) {
       query = {
         where: {}
       };
@@ -67,15 +55,6 @@ const docCtrl = {
         },
       };
     }
-    query.attributes = [
-      'id',
-      'title',
-      'content',
-      'access',
-      'ownerId',
-      'createdAt',
-      'updatedAt'
-    ];
     query.limit = req.query.limit || null;
     query.offset = req.query.offset || null;
     query.order = [['createdAt', 'DESC']];
@@ -83,8 +62,9 @@ const docCtrl = {
     db.Document
       .findAll(query)
       .then((docs) => {
-        res.status(200).send({ message: docs });
-      });
+        res.status(200).send({ message: 'success', docs });
+      })
+      .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -94,23 +74,22 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getDocumentById(req, res) {
+  getDocument(req, res) {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) {
           return res.status(404).send({ message: 'document not found' });
         }
-        if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
-          doc = documentAttributes(doc);
-          return res.status(200).send({ message: doc });
+        if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
+          return res.status(200).send({ message: 'success', doc });
         }
         if (doc.access === 'role' && doc.ownerRoleId === req.tokenDecode.roleId) {
-          doc = documentAttributes(doc);
-          return res.status(200).send({ message: doc });
+          return res.status(200).send({ message: 'success', doc });
         }
         res.status(401).send({ message: 'permission denied' });
-      });
+      })
+      .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -120,25 +99,19 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  updateDocumentById(req, res) {
+  update(req, res) {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'document not found' }); }
-        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
-          doc.update({
-            title: req.body.title || doc.title,
-            content: req.body.content || doc.content,
-            access: req.body.access || doc.access
-          })
-          .then((upDoc) => {
-            upDoc = documentAttributes(upDoc);
-            return res.status(200).send({ message: 'successful', upDoc });
-          });
+        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
+          doc.update(req.body)
+          .then(updatedDocument => res.status(200).send({ message: 'success', updatedDocument }));
         } else {
           res.status(401).send({ message: 'permission denied' });
         }
-      });
+      })
+      .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -148,16 +121,17 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  deteleDocumentById(req, res) {
+  detele(req, res) {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'no document found' }); }
-        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === 1) {
+        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
           doc.destroy()
           .then(() => res.status(200).send({ message: 'document deleted' }));
         } else { res.status(401).send({ message: 'permission denied' }); }
-      });
+      })
+      .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -167,40 +141,66 @@ const docCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  searchDocument(req, res) {
+  search(req, res) {
     if (!req.query.query) {
       return res.send({ message: 'enter search query' });
     }
-    const query = {
-      where: {
-        $and: [
-          {
-            $or: [
-              { access: 'public' },
-              { ownerId: req.tokenDecode.userId },
-              { $and: [
-                { access: 'role' },
-                { ownerRoleId: req.tokenDecode.roleId }
-              ] }
-            ]
-          },
-          {
-            $or: [
-              { title: { like: `%${req.query.query}%` } },
-              { content: { like: `%${req.query.query}%` } }
-            ]
-          }
-        ]
-      },
-      limit: req.query.limit || 20,
-      offset: req.query.offset || 10,
-      order: [['createdAt', 'DESC']]
-    };
+
+    const terms = [];
+    let query;
+    const searchArray = req.query.query.toLowerCase().match(/\w+/g);
+    const limit = req.query.limit || 20;
+    const offset = req.query.offset || null;
+    const order = [['createdAt', 'DESC']];
+
+    searchArray.forEach((word) => {
+      terms.push(`%${word}%`);
+    });
+
+    if (req.tokenDecode.roleId === isAdmin) {
+      query = {
+        where: {
+          $or: [
+            { title: { $ilike: { $any: terms } } },
+            { content: { $ilike: { $any: terms } } }
+          ]
+        }
+      };
+    } else {
+      query = {
+        where: {
+          $and: [
+            {
+              $or: [
+                { access: 'public' },
+                { ownerId: req.tokenDecode.userId },
+                { $and: [
+                  { access: 'role' },
+                  { ownerRoleId: req.tokenDecode.roleId }
+                ] }
+              ]
+            },
+            {
+              $or: [
+                { title: { $ilike: { $any: terms } } },
+                { content: { $ilike: { $any: terms } } }
+              ]
+            }
+          ]
+        },
+      };
+    }
+
+    query.limit = limit;
+    query.offset = offset;
+    query.order = order;
+
     db.Document
       .findAll(query)
       .then((docs) => {
-        res.status(200).send({ message: docs });
-      });
+        res.status(200).send({ message: 'success', docs });
+      })
+      .catch(error => res.status(500).send(error.errors));
   }
 
 };

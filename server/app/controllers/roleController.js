@@ -9,13 +9,13 @@ const roleCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  createRole(req, res) {
+  create(req, res) {
     db.Role
       .create(req.body)
       .then((role) => {
-        res.status(200).send({ message: 'role created successfully', role });
+        res.status(200).send({ message: 'success', role });
       })
-      .catch(error => res.status(400).send({ message: 'error', error }));
+      .catch(error => res.status(500).send(error.errors));
   },
 
   /**
@@ -25,12 +25,13 @@ const roleCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getAllRoles(req, res) {
+  getAll(req, res) {
     db.Role
       .findAll()
       .then((roles) => {
-        res.status(200).send({ message: roles });
-      });
+        res.status(200).send({ message: 'success', roles });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -40,16 +41,17 @@ const roleCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  updateRole(req, res) {
+  update(req, res) {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'no role found with this id' }); }
-        role.update({ title: req.body.title || role.title })
+        if (!role) { return res.status(404).send({ message: 'role not found' }); }
+        role.update(req.body)
         .then((updatedRole) => {
-          res.status(200).send({ message: updatedRole });
+          res.status(200).send({ message: 'success', updatedRole });
         });
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -59,16 +61,17 @@ const roleCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  deleteRole(req, res) {
+  delete(req, res) {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'no role found with this id' }); }
+        if (!role) { return res.status(404).send({ message: 'role not found' }); }
         role.destroy()
         .then(() => {
           res.status(200).send({ message: 'role deleted' });
         });
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -78,13 +81,14 @@ const roleCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getRoleById(req, res) {
+  getRole(req, res) {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'no role found' }); }
-        res.status(200).send({ message: role });
-      });
+        if (!role) { return res.status(404).send({ message: 'role not found' }); }
+        res.status(200).send({ message: 'success', role });
+      })
+      .catch(err => res.status(500).send(err.errors));
   }
 };
 

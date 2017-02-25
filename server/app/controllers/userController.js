@@ -2,22 +2,18 @@ import jwt from 'jsonwebtoken';
 import db from '../models/index';
 
 const secretKey = process.env.SECRET || 'funmilayoomomowo';
-const defaultValue = 2;
-
-const displayUserAttributes = (user) => {
-  const attributes = {
-    id: user.id,
-    username: user.username,
-    firstname: user.firstname,
-    lastname: user.lastname,
-    email: user.email,
-    RoleId: user.RoleId,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt
-  };
-
-  return attributes;
-};
+const isAdmin = 1;
+const attributes =
+  [
+    'id',
+    'username',
+    'firstname',
+    'lastname',
+    'email',
+    'roleId',
+    'createdAt',
+    'updatedAt'
+  ];
 
 const userCtrl = {
   /**
@@ -27,16 +23,9 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  createUser(req, res) {
+  create(req, res) {
     db.User
-      .create({
-        username: req.body.username,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: req.body.password,
-        roleId: req.body.roleId || defaultValue
-      })
+      .create(req.body)
       .then((user) => {
         const token = jwt.sign({
           userId: user.id,
@@ -44,10 +33,10 @@ const userCtrl = {
         },
           secretKey, { expiresIn: '7d' }
         );
-        user = displayUserAttributes(user);
+        user = user.getUserDetail();
         return res.status(201).send({ message: 'user created', token, user });
       })
-      .catch(err => res.status(400).send({ message: err.message }));
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -57,7 +46,7 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  userLogin(req, res) {
+  login(req, res) {
     db.User
       .findOne({
         where: {
@@ -72,7 +61,7 @@ const userCtrl = {
           },
             secretKey, { expiresIn: '7d' }
           );
-          user = displayUserAttributes(user);
+          user = user.getUserDetail();
           return res.status(200).send({
             message: 'logged in',
             token,
@@ -80,9 +69,10 @@ const userCtrl = {
           });
         }
         res.status(401).send({
-          message: 'failed to login'
+          message: 'User varification failed'
         });
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -92,10 +82,11 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  userLogout(req, res) {
+  logout(req, res) {
     res.status(200).send({
       message: 'logged out'
-    });
+    })
+    .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -105,25 +96,15 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getAllUser(req, res) {
+  getAll(req, res) {
     db.User
-      .findAll({
-        attributes: [
-          'id',
-          'username',
-          'firstname',
-          'lastname',
-          'email',
-          'roleId',
-          'createdAt',
-          'updatedAt'
-        ]
-      })
+      .findAll({ attributes })
       .then((users) => {
         if (users) {
-          res.status(200).send({ message: users });
+          res.status(200).send({ message: 'success', users });
         }
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -133,52 +114,47 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  getUserById(req, res) {
+  getUser(req, res) {
     db.User
-      .findById(req.params.id)
+      .findOne({ where: { id: req.params.id }, attributes })
       .then((user) => {
         if (user) {
-          user = displayUserAttributes(user);
-          return res.status(200).send({ message: user });
+          return res.status(200).send({ message: 'success', user });
         }
         res.status(404).send({
-          message: `user with ${req.params.id} not found in the database`
+          message: 'user not found'
         });
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
-    * Uspdate user attribute
+    * Update user attribute
     * Route: PUT: /users/:id
     * @param {Object} req request object
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  updateUserAttribute(req, res) {
+  update(req, res) {
     db.User
       .findById(req.params.id)
-      .then((result) => {
-        if (result) {
-          if (String(req.tokenDecode.userId) !== String(req.params.id)) {
+      .then((user) => {
+        if (user) {
+          if (String(req.tokenDecode.userId) !== String(req.params.id) && req.tokenDecode.roleId !== isAdmin) {
             return res.status(401).send({ message: 'Permission denied' });
           }
-          result.update({
-            username: req.body.username || result.username,
-            firstname: req.body.firstname || result.firstname,
-            lastname: req.body.lastname || result.lastname,
-            email: req.body.email || result.email,
-            password: req.body.password || result.password
-          })
+          user.update(req.body)
             .then((updatedUser) => {
-              updatedUser = displayUserAttributes(updatedUser);
-              res.status(200).send({ message: updatedUser });
+              updatedUser = updatedUser.getUserDetail();
+              res.status(200).send({ message: 'success', updatedUser });
             });
         } else {
           res.status(404).send({
             message: 'user not found'
           });
         }
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -188,7 +164,7 @@ const userCtrl = {
     * @param {Object} res response object
     * @returns {void} no returns
     */
-  deleteUser(req, res) {
+  delete(req, res) {
     db.User
       .findById(req.params.id)
       .then((user) => {
@@ -204,7 +180,8 @@ const userCtrl = {
             message: 'User not found'
           });
         }
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   },
 
   /**
@@ -236,18 +213,13 @@ const userCtrl = {
       .findAll({
         where: { id: req.params.id },
         include: [{ model: db.Document, where: query }],
-        attributes: [
-          'id',
-          'username',
-          'firstname',
-          'lastname',
-          'email'
-        ]
+        attributes
       })
       .then((userDoc) => {
         if (userDoc.length === 0) { return res.status(404).send({ message: 'no document found' }); }
         res.status(200).send(userDoc[0]);
-      });
+      })
+      .catch(err => res.status(500).send(err.errors));
   }
 
 };
