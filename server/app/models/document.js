@@ -29,11 +29,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'public',
       validate: {
-        isIn: [['public', 'private', 'role']],
         notEmpty: {
           args: true,
           msg: 'This field cannot be empty'
-        }
+        },
+        isIn: {
+          args: [['public', 'private', 'role']],
+          msg: 'public, private or role required'
+        },
       }
     },
     ownerRoleId: {

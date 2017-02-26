@@ -13,7 +13,8 @@
     "cover": "NODE_ENV=test node_modules/babel-cli/bin/babel-node.js node_modules/babel-istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- server/tests/**/*.js",
     "drop:db": "psql -c 'drop database if exists dms;' -U postgres",
     "create:db": "psql -c 'create database dms;' -U postgres",
-    "migrate": "NODE_ENV=development sequelize db:migrate"
+    "migrate": "NODE_ENV=development sequelize db:migrate",
+    "migrateTest": "NODE_ENV=test sequelize db:migrate"
   },
   "author": "Olawale Aladeusi",
   "license": "ISC",

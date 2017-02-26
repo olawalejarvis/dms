@@ -54,7 +54,7 @@ describe('User API', () => {
           .send(helper.invalidEmailUser)
           .end((err, res) => {
             expect(res.status).to.equal(500);
-            expect(res.body[0].message).to.equal('input a valid email address');
+            expect(res.body[0].message).to.equal('Input a valid email address');
             expect(res.body[0].type).to.equal('Validation error');
             expect(res.body[0].path).to.equal('email');
             done();

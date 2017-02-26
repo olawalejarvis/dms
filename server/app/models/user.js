@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: {
         args: true,
-        msg: 'Username already exist'
+        msg: 'username already exist'
       },
       validate: {
         is: {
@@ -20,12 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        is: {
-          args: /\w+/g,
-          msg: 'Input a valid username'
-        },
         notEmpty: {
           msg: 'This field cannot be empty'
+        },
+        is: {
+          args: /\w+/g,
+          msg: 'Input a valid firstname'
         }
       }
     },
@@ -33,34 +33,32 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        is: {
-          args: /\w+/g,
-          msg: 'Input a valid username'
-        },
         notEmpty: {
           msg: 'This field cannot be empty'
+        },
+        is: {
+          args: /\w+/g,
+          msg: 'Input a valid lastname'
         }
       }
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: false,
       unique: {
         args: true,
-        msg: 'Email already exist'
+        msg: 'email already exist'
       },
       validate: {
         isEmail: {
           args: true,
-          msg: 'input a valid email address'
+          msg: 'Input a valid email address'
         }
       }
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      notEmpty: {
-        msg: 'This field cannot be empty'
-      }
     },
     roleId: {
       type: DataTypes.INTEGER,
@@ -70,7 +68,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     validate: {
       validatePassword() {
-        if (!(/\w+/g.test(this.password)) || (this.password.length < 8)) {
+        if (this.password.length !== null && (!(/\w+/g.test(this.password)) || (this.password.length < 8))) {
           throw new Error('Minimum of of 8 characters is required');
         }
       }

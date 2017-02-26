@@ -2,6 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Role = sequelize.define('Role', {
     title: {
       type: DataTypes.STRING,
+      allowNull: false,
       unique: {
         args: true,
         msg: 'role already exist'
