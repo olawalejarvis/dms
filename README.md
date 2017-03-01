@@ -24,19 +24,19 @@ Document Management System API is built with the following technologies;
 
 ## Usage
 - Start the app with `$ npm start`
-- Use [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2) to consume available endpoints
+- Use Postman collection
+  [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2)
 
 **Users**:
 A created user will have a role, either an admin or a regular.
 - A Regular User can:
-    - Create an account `POST /users`
-    - Login `POST /users`
+    - Create an account
     - Edit his profile.
-    - Logout.
-    - Create a document `POST /documents`
-    - Edit a document `PUT /documents/:id`
-    - Retrieve a document `GET /documents/:id`
-    - Delete a document `DELETE /documents/:id`
+    - Search users
+    - Create a document
+    - Edit a document
+    - Retrieve a document
+    - Delete a document
     - Limit access to a document by specifying an access group `i.e. public, private or role`.
     - View public documents created by other users.
     - View documents created by his access group with access level set as `role`.
@@ -44,13 +44,13 @@ A created user will have a role, either an admin or a regular.
     - View `public` and `role` access level documents of other regular users.
 
 - An Admin User can:
-    - View all users `GET /users`
-    - View all created documents `GET /documents`
-    - Delete any user `DELETE /users/:id`
-    - Update any user's record `PUT /users/:id`
-    - Create a new role `POST /roles`
-    - View all created roles `GET /roles`
-    - Search for any user `GET /users/:id`
+    - View all users
+    - View all created documents
+    - Delete any user
+    - Update any user's record
+    - Create a new role
+    - View all created roles
+    - Search for any user
 
 **Documents**:
 Documents can be created and must have:
@@ -80,6 +80,8 @@ PUT | [/users/:id](#update-user) | Edit user details
 DELETE | [/users/:id](#delete-user) | Remove a user from storage
 GET | [/users/login](#login) | To log a user in
 GET | [/users/logout](#logout) | To log a user out
+GET | [/users/search](#search) | To search for a user
+GET | [/users/:id/documents](#get-documents-by-user) | Retrieve all documents created by a user
 
 **Roles**
 
@@ -98,7 +100,6 @@ Request type | Endpoint | Action
 POST | [/documents](#create-document) | Create a new document
 GET | [/documents](#get-documents) | Retrieve all documents
 GET | [/documents/:id](#get-a-document) | Retrieve a specific document
-GET | [/users/:id/documents](#get-documents-by-user) | Retrieve all documents created by a user
 GET | [/documents?query=new](#search-document-by-key) | Search documents using key terms
 GET | [/documents?limit=10](#get-documents) | Retrieve maximum of first 10 documents ordered by date of creation
 PUT | [/documents/:id](#update-document) | Update a specific document
