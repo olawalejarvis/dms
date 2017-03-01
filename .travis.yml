@@ -10,11 +10,6 @@ before_install:
 services:
   - postgresql
 
-before_script:
-  - psql -c 'drop database if exists dms_test;' -U postgres
-  - psql -c 'create database dms_test;' -U postgres
-  - NODE_ENV=test npm run migrate
-
 script:
   - npm test
 

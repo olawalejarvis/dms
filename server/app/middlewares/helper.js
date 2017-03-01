@@ -17,7 +17,7 @@ const dms = {
   },
   /**
    * Get user's data'
-   * @param {Object} data request object
+   * @param {Object} data object containing user's details
    * @returns {Object} user's object
    */
   getUserData(data) {
@@ -32,7 +32,7 @@ const dms = {
   },
   /**
    * Get user's profile'
-   * @param {Object} data request object
+   * @param {Object} data object containing user's details
    * @returns {Object} return user's data
    */
   userProfile(data) {
@@ -62,6 +62,69 @@ const dms = {
       'createdAt',
       'updatedAt'
     ];
+  },
+  /**
+   * Query for document's access
+   * @param {Object} req request object
+   * @returns {Object} return access query
+   */
+  docAccess(req) {
+    const access = {
+      $or:
+      [
+        { access: 'public' },
+        { ownerId: req.tokenDecode.userId },
+        {
+          $and: [
+            { access: 'role' },
+            { ownerRoleId: req.tokenDecode.roleId }
+          ]
+        }
+      ]
+    };
+    return access;
+  },
+  /**
+   * Query for search terms
+   * @param {Array} terms array of search terms
+   * @returns {Object} return user's data
+   */
+  likeSearch(terms) {
+    const like = {
+      $or:
+      [
+        { title: { $ilike: { $any: terms } } },
+        { content: { $ilike: { $any: terms } } }
+      ]
+    };
+    return like;
+  },
+  /**
+   * Get and validate queries
+   * @param {Object} query query object
+   * @returns {Object} return an object
+   */
+  validateQueries(query) {
+    const searchArray = query.query ? query.query.toLowerCase().match(/\w+/g) : null;
+    const limit = query.limit || 20;
+    const offset = query.offset || 0;
+    const publishedDate = query.publishedDate;
+    const order = publishedDate && publishedDate === 'ASC' ? publishedDate : 'DESC';
+    return { limit, offset, order, searchArray };
+  },
+  /**
+   * Set limit, offset and order
+   * @param {Number} limit limit
+   * @param {Number} offset
+   * @param {String} order ASC or DESC
+   * @param {Object} query query object
+   * @returns {Object} return query
+   */
+  setLimitOffsetOrder(limit, offset, order, query) {
+    query.limit = limit;
+    query.offset = offset;
+    query.order = [['createdAt', order]];
+    return query;
   }
 };
 

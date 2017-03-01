@@ -28,30 +28,22 @@ const docCtrl = {
     * @returns {void} no returns
     */
   getAll(req, res) {
-    let query;
+    let query = {};
     if (auth.isAdmin(req.tokenDecode.roleId)) {
-      query = {
-        where: {}
-      };
+      query.where = {};
     } else {
-      query = {
-        where: {
-          $or: [
-            { access: 'public' },
-            { ownerId: req.tokenDecode.userId },
-            {
-              $and: [
-                { access: 'role' },
-                { ownerRoleId: req.tokenDecode.roleId }
-              ]
-            }
-          ]
-        },
-      };
+      query.where = dms.docAccess(req);
     }
-    query.limit = req.query.limit || null;
-    query.offset = req.query.offset || null;
-    query.order = [['createdAt', 'DESC']];
+    const { limit, offset, order } = dms.validateQueries(req.query);
+
+    if (!Number(limit) || Number(offset) === 'NaN') {
+      return res.status(400).send({ message: 'only number is allowed' });
+    }
+    if (limit < 0 || offset < 0) {
+      return res.status(400).send({ message: 'negative number not allowed' });
+    }
+
+    query = dms.setLimitOffsetOrder(limit, offset, order, query);
 
     db.Document
       .findAll(query)
@@ -137,20 +129,15 @@ const docCtrl = {
     * @returns {void|Response} response object or void
     */
   search(req, res) {
-    if (!req.query.query) {
+    const terms = [];
+    let query = {};
+    const { limit, offset, order, searchArray } = dms.validateQueries(req.query);
+
+    if (!searchArray) {
       return res.send({ message: 'enter search query' });
     }
 
-    const terms = [];
-    let query;
-    const searchArray = req.query.query.toLowerCase().match(/\w+/g);
-    const limit = req.query.limit || 20;
-    const offset = req.query.offset || 0;
-    const publishedDate = req.query.publishedDate;
-
-    const order = publishedDate && publishedDate === 'ASC' ? publishedDate : 'DESC';
-
-    if (!Number(limit)) {
+    if (!Number(limit) || Number(offset) === 'NaN') {
       return res.status(400).send({ message: 'only number is allowed' });
     }
     if (limit < 0 || offset < 0) {
@@ -162,42 +149,13 @@ const docCtrl = {
     });
 
     if (auth.isAdmin(req.tokenDecode.roleId)) {
-      query = {
-        where: {
-          $or: [
-            { title: { $ilike: { $any: terms } } },
-            { content: { $ilike: { $any: terms } } }
-          ]
-        }
-      };
+      query.where = dms.likeSearch(terms);
     } else {
-      query = {
-        where: {
-          $and: [
-            {
-              $or: [
-                { access: 'public' },
-                { ownerId: req.tokenDecode.userId },
-                { $and: [
-                  { access: 'role' },
-                  { ownerRoleId: req.tokenDecode.roleId }
-                ] }
-              ]
-            },
-            {
-              $or: [
-                { title: { $ilike: { $any: terms } } },
-                { content: { $ilike: { $any: terms } } }
-              ]
-            }
-          ]
-        },
+      query.where = {
+        $and: [dms.docAccess(req), dms.likeSearch(terms)]
       };
     }
-
-    query.limit = limit;
-    query.offset = offset;
-    query.order = [['createdAt', order]];
+    query = dms.setLimitOffsetOrder(limit, offset, order, query);
 
     db.Document
       .findAll(query)

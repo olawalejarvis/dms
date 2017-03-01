@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notEmpty: {
-          args: true,
           msg: 'This field cannot be empty'
         }
       }
@@ -19,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notEmpty: {
-          args: true,
           msg: 'This field cannot be empty'
         }
       }
@@ -30,7 +28,6 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'public',
       validate: {
         notEmpty: {
-          args: true,
           msg: 'This field cannot be empty'
         },
         isIn: {

@@ -89,18 +89,6 @@ module.exports = (sequelize, DataTypes) => {
       validPassword(password) {
         return bcrypt.compareSync(password, this.password);
       },
-      getUserDetail() {
-        return {
-          id: this.id,
-          username: this.username,
-          firstname: this.firstname,
-          lastname: this.lastname,
-          email: this.email,
-          roleId: this.roleId,
-          createdAt: this.createdAt,
-          updatedAt: this.updatedAt
-        };
-      }
     },
     hooks: {
       beforeCreate(user) {

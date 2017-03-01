@@ -64,14 +64,7 @@ const userCtrl = {
     * @returns {void} no returns
     */
   logout(req, res) {
-    db.User.findById(req.tokenDecode.userId)
-      .then((user) => {
-        user.update({ accessToken: false })
-          .then(() => {
-            res.status(200).send({ message: 'logged out' });
-          });
-      })
-    .catch(err => res.status(500).send(err.errors));
+    res.status(200).send({ message: 'logged out' });
   },
 
   /**
@@ -185,18 +178,7 @@ const userCtrl = {
     if (auth.isAdmin(req.tokenDecode.roleId)) {
       query = {};
     } else {
-      query = {
-        $or: [
-          { access: 'public' },
-          { ownerId: req.tokenDecode.userId },
-          {
-            $and: [
-              { access: 'role' },
-              { ownerRoleId: req.tokenDecode.roleId }
-            ]
-          }
-        ]
-      };
+      query = dms.docAccess(req);
     }
     db.User
       .findAll({

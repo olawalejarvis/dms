@@ -380,7 +380,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all documents created by a particular user irrespective of the access level and every other document with role or puclic access with limit set to 4 and offset set to 2', (done) => {
+    it('should return all documents created by a particular user irrespective of the access level and every other document with role or puclic access with limit set to 4', (done) => {
       superRequest.get('/documents?limit=4')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
