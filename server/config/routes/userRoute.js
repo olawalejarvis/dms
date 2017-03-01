@@ -14,6 +14,8 @@ userRouter.route('/login')
 userRouter.route('/logout')
   .post(auth.verifyToken, userCtrl.logout);
 
+userRouter.get('/search', auth.verifyToken, userCtrl.search);
+
 userRouter.route('/:id')
   .get(auth.verifyToken, userCtrl.getUser)
   .put(auth.verifyToken, userCtrl.update)
@@ -21,6 +23,5 @@ userRouter.route('/:id')
 
 userRouter.route('/:id/documents')
   .get(auth.verifyToken, userCtrl.findUserDocuments);
-
 
 export default userRouter;

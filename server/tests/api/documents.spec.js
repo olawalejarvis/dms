@@ -411,13 +411,13 @@ describe('DOCUMENT API', () => {
         });
     });
   });
-  describe('DOCUMENT SEARCH', () => {
+  describe('DOCUMENT SEARCH PAGINATION', () => {
     it('should return search results', (done) => {
       superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.forEach((doc) => {
+          res.body.docs.rows.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
               expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
             } else { expect(doc.access).to.be.oneOf(['public', 'role']); }
@@ -431,7 +431,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.forEach((doc) => {
+          res.body.docs.rows.forEach((doc) => {
             expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
           });
           done();
@@ -442,7 +442,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.forEach((doc) => {
+          res.body.docs.rows.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
               expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
             } else { expect(doc.access).to.be.oneOf(['public', 'role']); }
@@ -456,7 +456,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.forEach((doc) => {
+          res.body.docs.rows.forEach((doc) => {
             expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
           });
           done();

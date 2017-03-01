@@ -293,6 +293,23 @@ describe('User API', () => {
           });
       });
     });
+    describe('SEARCH USERS PAGINATION', () => {
+      const arrayUsers = helper.usersArray();
+      before((done) => {
+        db.User.bulkCreate(arrayUsers);
+        done();
+      });
+      it('should return search result', (done) => {
+        superRequest.get(`/users/search?query=${arrayUsers[0].firstname.substr(1, 6)}`)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.body.message).to.equal('success');
+            expect(res.body).to.have.property('next');
+            expect(res.body).to.have.property('currentPage');
+            done();
+          });
+      });
+    });
     describe('Logout', () => {
       it('should logout successfully', (done) => {
         superRequest.post('/users/logout')

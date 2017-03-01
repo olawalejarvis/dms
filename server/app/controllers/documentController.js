@@ -1,5 +1,5 @@
 import db from '../models/index';
-import dms from '../middlewares/helper';
+import dms from '../controllers/helper';
 import auth from '../middlewares/auth';
 
 const docCtrl = {
@@ -158,9 +158,10 @@ const docCtrl = {
     query = dms.setLimitOffsetOrder(limit, offset, order, query);
 
     db.Document
-      .findAll(query)
+      .findAndCountAll(query)
       .then((docs) => {
-        res.status(200).send({ message: 'success', docs });
+        const { next, currentPage } = dms.nextAndCurrentPage(docs.count, limit, offset);
+        res.status(200).send({ message: 'success', docs, next, currentPage });
       })
       .catch(error => res.status(500).send(error.errors));
   }

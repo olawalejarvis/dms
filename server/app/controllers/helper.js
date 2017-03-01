@@ -125,6 +125,18 @@ const dms = {
     query.offset = offset;
     query.order = [['createdAt', order]];
     return query;
+  },
+  /**
+   * Set limit, offset and order
+   * @param {Number} count array's count
+   * @param {Number} limit
+   * @param {Number} offset
+   * @returns {Object} return an object
+   */
+  nextAndCurrentPage(count, limit, offset) {
+    const next = Math.ceil(count / limit);
+    const currentPage = Math.floor((offset / limit) + 1);
+    return { next, currentPage };
   }
 };
 

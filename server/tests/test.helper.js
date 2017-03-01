@@ -67,6 +67,19 @@ const helper = {
     email: faker.internet.email(),
     password: faker.internet.password()
   },
+  usersArray() {
+    const users = [];
+    for (let i = 0; i <= 10; i += 1) {
+      users.push({
+        username: faker.internet.userName(),
+        firstname: faker.name.firstName(),
+        lastname: faker.name.lastName(),
+        email: faker.internet.email(),
+        password: faker.internet.password()
+      });
+    }
+    return users;
+  },
   invalidEmailUser: {
     username: faker.internet.userName(),
     firstname: faker.name.firstName(),
