@@ -1,6 +1,6 @@
 import db from '../models/index';
-
-const isAdmin = 1;
+import dms from '../middlewares/helper';
+import auth from '../middlewares/auth';
 
 const docCtrl = {
 
@@ -13,13 +13,7 @@ const docCtrl = {
     */
   create(req, res) {
     db.Document
-      .create({
-        title: req.body.title,
-        content: req.body.content,
-        ownerId: req.tokenDecode.userId,
-        access: req.body.access,
-        ownerRoleId: req.tokenDecode.roleId
-      })
+      .create(dms.getDocumentData(req))
        .then((document) => {
          res.status(201).send({ message: 'success', document });
        })
@@ -35,7 +29,7 @@ const docCtrl = {
     */
   getAll(req, res) {
     let query;
-    if (req.tokenDecode.roleId === isAdmin) {
+    if (auth.isAdmin(req.tokenDecode.roleId)) {
       query = {
         where: {}
       };
@@ -72,7 +66,7 @@ const docCtrl = {
     * Route: GET: /documents/:id
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   getDocument(req, res) {
     db.Document
@@ -81,10 +75,11 @@ const docCtrl = {
         if (!doc) {
           return res.status(404).send({ message: 'document not found' });
         }
-        if (doc.access === 'public' || doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
+        if (auth.isPublic(doc) || auth.isOwnerDoc(doc, req)
+          || auth.isAdmin(req.tokenDecode.roleId)) {
           return res.status(200).send({ message: 'success', doc });
         }
-        if (doc.access === 'role' && doc.ownerRoleId === req.tokenDecode.roleId) {
+        if (auth.hasRoleAccess(doc, req)) {
           return res.status(200).send({ message: 'success', doc });
         }
         res.status(401).send({ message: 'permission denied' });
@@ -104,7 +99,7 @@ const docCtrl = {
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'document not found' }); }
-        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
+        if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
           doc.update(req.body)
           .then(updatedDocument => res.status(200).send({ message: 'success', updatedDocument }));
         } else {
@@ -126,7 +121,7 @@ const docCtrl = {
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) { return res.status(404).send({ message: 'no document found' }); }
-        if (doc.ownerId === req.tokenDecode.userId || req.tokenDecode.roleId === isAdmin) {
+        if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
           doc.destroy()
           .then(() => res.status(200).send({ message: 'document deleted' }));
         } else { res.status(401).send({ message: 'permission denied' }); }
@@ -139,7 +134,7 @@ const docCtrl = {
     * Route: GET: /searchs?query={}
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   search(req, res) {
     if (!req.query.query) {
@@ -150,14 +145,23 @@ const docCtrl = {
     let query;
     const searchArray = req.query.query.toLowerCase().match(/\w+/g);
     const limit = req.query.limit || 20;
-    const offset = req.query.offset || null;
-    const order = [['createdAt', 'DESC']];
+    const offset = req.query.offset || 0;
+    const publishedDate = req.query.publishedDate;
+
+    const order = publishedDate && publishedDate === 'ASC' ? publishedDate : 'DESC';
+
+    if (!Number(limit)) {
+      return res.status(400).send({ message: 'only number is allowed' });
+    }
+    if (limit < 0 || offset < 0) {
+      return res.status(400).send({ message: 'negative number not allowed' });
+    }
 
     searchArray.forEach((word) => {
       terms.push(`%${word}%`);
     });
 
-    if (req.tokenDecode.roleId === isAdmin) {
+    if (auth.isAdmin(req.tokenDecode.roleId)) {
       query = {
         where: {
           $or: [
@@ -193,7 +197,7 @@ const docCtrl = {
 
     query.limit = limit;
     query.offset = offset;
-    query.order = order;
+    query.order = [['createdAt', order]];
 
     db.Document
       .findAll(query)

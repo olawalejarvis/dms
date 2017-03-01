@@ -18,75 +18,76 @@ let role;
 describe('ROLE API', () => {
   before((done) => {
     db.Role.create(adminRoleParams)
-      .then((adminRole) => {
-        adminParams.roleId = adminRole.id;
-        superRequest.post('/users')
-          .send(adminParams)
-          .end((err, res) => {
-            adminToken = res.body.token;
-            done();
+      .then((newRole) => {
+        adminParams.roleId = newRole.id;
+        db.User.create(adminParams)
+          .then(() => {
+            superRequest.post('/users/login')
+              .send(adminParams)
+              .end((err, res) => {
+                adminToken = res.body.token;
+                done();
+              });
           });
       });
   });
   after(() => db.Role.destroy({ where: {} }));
 
-  describe('CREATE ROLE POST /roles/', () => {
-    describe('ADMIN', () => {
-      it('should allow admin to create a role', (done) => {
-        superRequest.post('/roles')
-          .send(regularRoleParams)
-          .set({ 'x-access-token': adminToken })
-          .end((err, res) => {
-            expect(res.status).to.equal(200);
-            expect(res.body.role.title).to.equal(regularRoleParams.title);
-            done();
-          });
-      });
-      it('should return error when role title already exist', (done) => {
-        superRequest.post('/roles')
-          .send(regularRoleParams)
-          .set({ 'x-access-token': adminToken })
-          .end((err, res) => {
-            expect(res.status).to.equal(500);
-            expect(res.body[0].type).to.equal('unique violation');
-            done();
-          });
-      });
-      it('should return error when no title is set by admin', (done) => {
-        superRequest.post('/roles')
-          .send({ title: '' })
-          .set({ 'x-access-token': adminToken })
-          .end((err, res) => {
-            expect(res.status).to.equal(500);
-            expect(res.body[0].type).to.equal('Validation error');
-            expect(res.body[1].message).to.equal('This field cannot be empty');
-            done();
-          });
-      });
-      it('should return error when invalid or no token is set', (done) => {
-        superRequest.post('/roles')
-          .send(helper.testRoleG)
-          .end((err, res) => {
-            expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('verification failed');
-            done();
-          });
-      });
-      it('should not allow regular user to create a role', (done) => {
-        superRequest.post('/users')
-          .send(helper.regularUser2)
-          .end((err, res) => {
-            reguToken = res.body.token;
-            superRequest.post('/roles')
-              .send(helper.testRoleSample)
-              .set({ 'x-access-token': reguToken })
-              .end((er, re) => {
-                expect(re.status).to.equal(403);
-                expect(re.body.message).to.equal('permission denied');
-                done();
-              });
-          });
-      });
+  describe('ADMIN', () => {
+    it('should allow admin to create a role', (done) => {
+      superRequest.post('/roles')
+        .send(regularRoleParams)
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.role.title).to.equal(regularRoleParams.title);
+          done();
+        });
+    });
+    it('should return error when role title already exist', (done) => {
+      superRequest.post('/roles')
+        .send(regularRoleParams)
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(500);
+          expect(res.body[0].type).to.equal('unique violation');
+          done();
+        });
+    });
+    it('should return error when no title is set by admin', (done) => {
+      superRequest.post('/roles')
+        .send({ title: '' })
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(500);
+          expect(res.body[0].type).to.equal('Validation error');
+          expect(res.body[1].message).to.equal('This field cannot be empty');
+          done();
+        });
+    });
+    it('should return error when invalid or no token is set', (done) => {
+      superRequest.post('/roles')
+        .send(helper.testRoleG)
+        .end((err, res) => {
+          expect(res.status).to.equal(401);
+          expect(res.body.message).to.equal('verification failed');
+          done();
+        });
+    });
+    it('should not allow regular user to create a role', (done) => {
+      superRequest.post('/users')
+        .send(helper.regularUser2)
+        .end((err, res) => {
+          reguToken = res.body.token;
+          superRequest.post('/roles')
+            .send(helper.testRoleSample)
+            .set({ 'x-access-token': reguToken })
+            .end((er, re) => {
+              expect(re.status).to.equal(403);
+              expect(re.body.message).to.equal('permission denied');
+              done();
+            });
+        });
     });
   });
   describe('DELETE ROLE, DELETE /roles', () => {

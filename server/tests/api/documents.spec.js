@@ -8,53 +8,43 @@ import helper from '../test.helper';
 const superRequest = request.agent(app);
 const expect = chai.expect;
 
-const adminParams = helper.adminUser;
-const regularParams = helper.regularUser;
-const regularParams2 = helper.regularUser2;
-
 const publicD = helper.publicDocument;
 const privateD = helper.privateDocument;
 const roleD = helper.roleDocument;
 
-const regularRoleParams = helper.testRoleR;
-const adminRoleParams = helper.testRoleA;
+const compareDates = (firstDate, secondDate) =>
+  new Date(firstDate).getTime() <= new Date(secondDate).getTime();
 
 describe('DOCUMENT API', () => {
   let adminToken, regularToken, regularToken2;
 
   let adminUser, regularUser, regularUser2;
 
-  let adminRole, regularRole;
-
   let createdDoc, roleDocument, publicDocument, privateDocument;
 
   let document, updateDoc;
 
   before((done) => {
-    db.Role.create(adminRoleParams)
-      .then((roleA) => {
-        adminParams.roleId = roleA.id;
-        adminRole = roleA;
-        db.Role.create(regularRoleParams)
-          .then((roleR) => {
-            regularRole = roleR;
-            regularParams.roleId = roleR.id;
-            regularParams2.roleId = roleR.id;
-            superRequest.post('/users')
-              .send(adminParams)
-              .end((err, res) => {
-                adminToken = res.body.token;
-                adminUser = res.body.user;
+    db.Role.bulkCreate([helper.testRoleA, helper.testRoleR])
+      .then((roles) => {
+        helper.adminUser.roleId = roles[0].id;
+        db.User.create(helper.adminUser)
+          .then((admin) => {
+            adminUser = admin.dataValues;
+            superRequest.post('/users/login')
+              .send(helper.adminUser)
+              .end((err, res1) => {
+                adminToken = res1.body.token;
                 superRequest.post('/users')
-                  .send(regularParams)
-                  .end((err1, res1) => {
-                    regularToken = res1.body.token;
-                    regularUser = res1.body.user;
+                  .send(helper.regularUser)
+                  .end((err, res2) => {
+                    regularUser = res2.body.user;
+                    regularToken = res2.body.token;
                     superRequest.post('/users')
-                      .send(regularParams2)
-                      .end((err2, res2) => {
-                        regularToken2 = res2.body.token;
-                        regularUser2 = res2.body.user;
+                      .send(helper.regularUser2)
+                      .end((err, res3) => {
+                        regularUser2 = res3.body.user;
+                        regularToken2 = res3.body.token;
                         done();
                       });
                   });
@@ -66,11 +56,9 @@ describe('DOCUMENT API', () => {
     db.Role.destroy({ where: {} });
   });
   it('check every data you have created', (done) => {
-    expect(adminRole.title).to.equal(adminRoleParams.title);
-    expect(regularRole.title).to.equal(regularRoleParams.title);
-    expect(adminUser.username).to.equal(adminParams.username);
-    expect(regularUser.username).to.equal(regularParams.username);
-    expect(regularUser2.username).to.equal(regularParams2.username);
+    expect(adminUser.username).to.equal(helper.adminUser.username);
+    expect(regularUser.username).to.equal(helper.regularUser.username);
+    expect(regularUser2.username).to.equal(helper.regularUser2.username);
     done();
   });
   describe('CREATE POST /documents', () => {
@@ -148,8 +136,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-
-    it('should update doucment for owner alone', (done) => {
+    it('should update document when user is the owner', (done) => {
       updateDoc = { title: 'andela' };
       superRequest.put(`/documents/${createdDoc.id}`)
         .send(updateDoc)
@@ -394,9 +381,10 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should return all documents created by a particular user irrespective of the access level and every other document with role or puclic access with limit set to 4 and offset set to 2', (done) => {
-      superRequest.get('/documents?limit=4&offset=2')
+      superRequest.get('/documents?limit=4')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
+          expect(res.body.docs.length).to.equal(4);
           expect(res.status).to.equal(200);
           res.body.docs.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
@@ -409,10 +397,23 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+    it('should return all documents in descending order of published date', (done) => {
+      superRequest.get('/documents')
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.message).to.equal('success');
+          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            expect(flag).to.equal(false);
+          }
+          done();
+        });
+    });
   });
   describe('DOCUMENT SEARCH', () => {
-    it('should return search result', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=4&offset=2`)
+    it('should return search results', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -426,7 +427,7 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should return all search results to admin', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=4&offset=2`)
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -437,7 +438,7 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should allow multiple terms search', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}&limit=4&offset=2`)
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -451,7 +452,7 @@ describe('DOCUMENT API', () => {
         });
     });
     it('should return all multiple terms search\'s results to admin', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}&limit=4&offset=2`)
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -466,6 +467,55 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.body.message).to.equal('enter search query');
+          done();
+        });
+    });
+    it('should return error when limit entered is negative', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=-2`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('negative number not allowed');
+          done();
+        });
+    });
+    it('should return error when offset entered is negative', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=2&offset=-2`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('negative number not allowed');
+          done();
+        });
+    });
+    it('should return error when limit entered is string', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=aaa`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('only number is allowed');
+          done();
+        });
+    });
+    it('should return documents in descending order of published date', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&publishedDate=DESC`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            expect(flag).to.equal(false);
+          }
+          done();
+        });
+    });
+    it('should return documents in ascending order of published date', (done) => {
+      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&publishedDate=ASC`)
+        .set({ 'x-access-token': regularToken2 })
+        .end((err, res) => {
+          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            expect(flag).to.equal(true);
+          }
           done();
         });
     });

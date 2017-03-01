@@ -1,19 +1,6 @@
-import jwt from 'jsonwebtoken';
 import db from '../models/index';
-
-const secretKey = process.env.SECRET || 'funmilayoomomowo';
-const isAdmin = 1;
-const attributes =
-  [
-    'id',
-    'username',
-    'firstname',
-    'lastname',
-    'email',
-    'roleId',
-    'createdAt',
-    'updatedAt'
-  ];
+import auth from '../middlewares/auth';
+import dms from '../middlewares/helper';
 
 const userCtrl = {
   /**
@@ -21,19 +8,18 @@ const userCtrl = {
     * Route: POST: /users
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   create(req, res) {
+    if (req.body.roleId && req.body.roleId === 1) {
+      return res.status(403).send({ message: 'permission denied' });
+    }
+    const data = dms.getUserData(req.body);
     db.User
-      .create(req.body)
+      .create(data)
       .then((user) => {
-        const token = jwt.sign({
-          userId: user.id,
-          roleId: user.roleId
-        },
-          secretKey, { expiresIn: '7d' }
-        );
-        user = user.getUserDetail();
+        const token = auth.getToken(user);
+        user = dms.userProfile(user);
         return res.status(201).send({ message: 'user created', token, user });
       })
       .catch(err => res.status(500).send(err.errors));
@@ -44,7 +30,7 @@ const userCtrl = {
     * Route: POST: /users/login
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   login(req, res) {
     db.User
@@ -55,13 +41,8 @@ const userCtrl = {
       })
       .then((user) => {
         if (user && user.validPassword(req.body.password)) {
-          const token = jwt.sign({
-            userId: user.id,
-            roleId: user.roleId
-          },
-            secretKey, { expiresIn: '7d' }
-          );
-          user = user.getUserDetail();
+          const token = auth.getToken(user);
+          user = dms.userProfile(user);
           return res.status(200).send({
             message: 'logged in',
             token,
@@ -83,9 +64,13 @@ const userCtrl = {
     * @returns {void} no returns
     */
   logout(req, res) {
-    res.status(200).send({
-      message: 'logged out'
-    })
+    db.User.findById(req.tokenDecode.userId)
+      .then((user) => {
+        user.update({ accessToken: false })
+          .then(() => {
+            res.status(200).send({ message: 'logged out' });
+          });
+      })
     .catch(err => res.status(500).send(err.errors));
   },
 
@@ -98,7 +83,7 @@ const userCtrl = {
     */
   getAll(req, res) {
     db.User
-      .findAll({ attributes })
+      .findAll({ attributes: dms.getUserAttribute() })
       .then((users) => {
         if (users) {
           res.status(200).send({ message: 'success', users });
@@ -112,11 +97,11 @@ const userCtrl = {
     * Route: get: /users/:id
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   getUser(req, res) {
     db.User
-      .findOne({ where: { id: req.params.id }, attributes })
+      .findOne({ where: { id: req.params.id }, attributes: dms.getUserAttribute() })
       .then((user) => {
         if (user) {
           return res.status(200).send({ message: 'success', user });
@@ -133,19 +118,19 @@ const userCtrl = {
     * Route: PUT: /users/:id
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Response} response object or void
     */
   update(req, res) {
+    if (!(auth.isAdmin(req.tokenDecode.roleId) || auth.isOwner(req))) {
+      return res.status(401).send({ message: 'Permission denied' });
+    }
     db.User
       .findById(req.params.id)
       .then((user) => {
         if (user) {
-          if (String(req.tokenDecode.userId) !== String(req.params.id) && req.tokenDecode.roleId !== isAdmin) {
-            return res.status(401).send({ message: 'Permission denied' });
-          }
           user.update(req.body)
             .then((updatedUser) => {
-              updatedUser = updatedUser.getUserDetail();
+              updatedUser = dms.userProfile(updatedUser);
               res.status(200).send({ message: 'success', updatedUser });
             });
         } else {
@@ -169,12 +154,16 @@ const userCtrl = {
       .findById(req.params.id)
       .then((user) => {
         if (user) {
-          user.destroy()
+          if (!auth.isAdmin(user.roleId)) {
+            user.destroy()
             .then(() => {
               res.status(200).send({
                 message: 'deleted successfully'
               });
             });
+          } else {
+            res.status(403).send({ message: 'can not delete an admin user' });
+          }
         } else {
           res.status(404).send({
             message: 'User not found'
@@ -193,7 +182,7 @@ const userCtrl = {
     */
   findUserDocuments(req, res) {
     let query;
-    if (req.tokenDecode.roleId === 1) {
+    if (auth.isAdmin(req.tokenDecode.roleId)) {
       query = {};
     } else {
       query = {
@@ -213,7 +202,7 @@ const userCtrl = {
       .findAll({
         where: { id: req.params.id },
         include: [{ model: db.Document, where: query }],
-        attributes
+        attributes: dms.getUserAttribute()
       })
       .then((userDoc) => {
         if (userDoc.length === 0) { return res.status(404).send({ message: 'no document found' }); }

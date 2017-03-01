@@ -30,8 +30,14 @@ const helper = {
     firstname: faker.name.firstName(),
     lastname: faker.name.lastName(),
     email: faker.internet.email(),
-    password: faker.internet.password(),
-    roleId: 1
+    password: faker.internet.password()
+  },
+  adminUser1: {
+    username: faker.internet.userName(),
+    firstname: faker.name.firstName(),
+    lastname: faker.name.lastName(),
+    email: faker.internet.email(),
+    password: faker.internet.password()
   },
   regularUser: {
     username: faker.internet.userName(),
@@ -73,8 +79,7 @@ const helper = {
     firstname: faker.name.firstName(),
     lastname: faker.name.lastName(),
     email: faker.internet.email(),
-    password: 'ola',
-    roleId: 1
+    password: 'ola'
   },
   publicDocument: {
     title: faker.company.catchPhrase(),

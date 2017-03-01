@@ -12,7 +12,7 @@ userRouter.route('/login')
   .post(userCtrl.login);
 
 userRouter.route('/logout')
-  .post(userCtrl.logout);
+  .post(auth.verifyToken, userCtrl.logout);
 
 userRouter.route('/:id')
   .get(auth.verifyToken, userCtrl.getUser)

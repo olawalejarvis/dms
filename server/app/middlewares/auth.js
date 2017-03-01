@@ -34,7 +34,7 @@ const auth = {
    * @param {Object} req request object
    * @param {Object} res response object
    * @param {Object} next move to next controller handler
-   * @returns {void} no returns
+   * @returns {Object} Object
    */
   hasAdminPermission(req, res, next) {
     db.Role
@@ -44,6 +44,62 @@ const auth = {
           next();
         } else { return res.status(403).send({ message: 'permission denied' }); }
       });
+  },
+  /**
+   * Check for admin permission
+   * @param {String} roleId user role id
+   * @returns {Boolean} true or false
+   */
+  isAdmin(roleId) {
+    return roleId === 1;
+  },
+  /**
+   * Check for owner
+   * @param {Object} req request object
+   * @returns {Boolean} true or false
+   */
+  isOwner(req) {
+    return String(req.tokenDecode.userId) === String(req.params.id);
+  },
+  /**
+   * Check if document's access level is public
+   * @param {Object} doc object
+   * @returns {Boolean} true or false
+   */
+  isPublic(doc) {
+    return doc.access === 'public';
+  },
+  /**
+   * Check for document's owner
+   * @param {Object} doc object
+   * @param {Object} req request object
+   * @returns {Boolean} true or false
+   */
+  isOwnerDoc(doc, req) {
+    return doc.ownerId === req.tokenDecode.userId;
+  },
+  /**
+   * Check for document's role permission
+   * @param {Object} doc object
+   * @param {Object} req request object
+   * @returns {Boolean} true or false
+   */
+  hasRoleAccess(doc, req) {
+    return (doc.access === 'role' && doc.ownerRoleId === req.tokenDecode.roleId);
+  },
+  /**
+   * Get token
+   * @param {Object} user user's object
+   * @returns {Boolean} true or false
+   */
+  getToken(user) {
+    const userToken = jwt.sign({
+      userId: user.id,
+      roleId: user.roleId
+    },
+      secretKey, { expiresIn: '7d' }
+    );
+    return userToken;
   }
 };
 
