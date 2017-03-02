@@ -1,6 +1,6 @@
 import db from '../models/index';
-import auth from '../middlewares/auth';
-import dms from '../controllers/helper';
+import auth from '../middlewares/Auth';
+import dms from '../controllers/Helper';
 
 const userCtrl = {
   /**

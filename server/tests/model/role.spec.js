@@ -12,7 +12,7 @@ describe('ROLE', () => {
   });
 
   describe('Create Role', () => {
-    it('should save role detail', (done) => {
+    it('should create a role', (done) => {
       db.Role.create(helper.testRoleG)
         .then((role) => {
           guestRole = role.dataValues;
@@ -48,7 +48,7 @@ describe('ROLE', () => {
     });
   });
   describe('EMPTY String violation', () => {
-    it('should fail when title is an empty string', (done) => {
+    it('should fail for empty string title', (done) => {
       const emptyTitle = { title: ' ' };
       db.Role.create(emptyTitle)
         .then()

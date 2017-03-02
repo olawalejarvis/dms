@@ -19,7 +19,7 @@ describe('User Model', () => {
   after((done) => { db.Role.destroy({ where: {} }); done(); });
 
   describe('Create user', () => {
-    it('should save all user\'s details', (done) => {
+    it('should create a user', (done) => {
       db.User.create(helper.regularUser)
         .then((user) => {
           regularUser = user.dataValues;
@@ -32,7 +32,7 @@ describe('User Model', () => {
           done();
         });
     });
-    it('should fails when email is invalid', (done) => {
+    it('should not create a user when email is invalid', (done) => {
       db.User.create(helper.invalidEmailUser)
         .then()
         .catch((error) => {
@@ -42,7 +42,7 @@ describe('User Model', () => {
           done();
         });
     });
-    it('should fails when password character is not up to 8', (done) => {
+    it('should not create a user when password character is not up to 8', (done) => {
       db.User.create(helper.invalidPasswordUser)
         .then()
         .catch((error) => {
@@ -71,7 +71,7 @@ describe('User Model', () => {
   });
   describe('NOT NULL VIOLATIONS', () => {
     requiredFields.forEach((field) => {
-      it(`should fail when ${field} is null`, (done) => {
+      it(`should fails when ${field} is null`, (done) => {
         const nullField = Object.assign({}, helper.secondUser);
         nullField[field] = null;
         db.User.create(nullField)
@@ -88,7 +88,7 @@ describe('User Model', () => {
   });
   describe('Empty string Violations', () => {
     emptyFields.forEach((field) => {
-      it(`should fail when ${field} is empty`, (done) => {
+      it(`should fails when ${field} is empty`, (done) => {
         const emptyField = Object.assign({}, helper.secondUser);
         emptyField[field] = '';
         db.User.create(emptyField)

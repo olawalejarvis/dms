@@ -23,7 +23,7 @@ describe('Document Model', () => {
   after((done) => { db.Role.destroy({ where: {} }); done(); });
 
   describe('CREATE Document', () => {
-    it('should create document', (done) => {
+    it('should create a document', (done) => {
       helper.publicDocument.ownerRoleId = regularUser.roleId;
       helper.publicDocument.ownerId = regularUser.id;
       db.Document.create(helper.publicDocument)
@@ -39,7 +39,7 @@ describe('Document Model', () => {
   });
   describe('Not Null Violation', () => {
     requiredFields.forEach((field) => {
-      it('should return not null Violation message', (done) => {
+      it('should return "not null Violation message"', (done) => {
         const notNull = Object.assign({}, helper.publicDocument);
         notNull[field] = null;
         db.Document.create(notNull)

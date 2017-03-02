@@ -1,9 +1,9 @@
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
-import userRouter from './routes/userRoute';
-import docRouter from './routes/documentRoute';
-import roleRouter from './routes/roleRoute';
+import userRouter from './routes/UserRoute';
+import docRouter from './routes/DocumentRoute';
+import roleRouter from './routes/RoleRoute';
 
 // Set up the express app
 const app = express();

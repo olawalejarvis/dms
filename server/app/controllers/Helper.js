@@ -137,6 +137,16 @@ const dms = {
     const next = Math.ceil(count / limit);
     const currentPage = Math.floor((offset / limit) + 1);
     return { next, currentPage };
+  },
+  /**
+   * Validate documents input
+   * @param {Object} req request object
+   * @returns {Object} return an object
+   */
+  validateDocumentsInput(req) {
+    const title = /\w+/g.test(req.body.title);
+    const content = /\w+/g.test(req.body.content);
+    return { title, content };
   }
 };
 

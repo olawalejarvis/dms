@@ -1,6 +1,6 @@
 import db from '../models/index';
-import dms from '../controllers/helper';
-import auth from '../middlewares/auth';
+import dms from '../controllers/Helper';
+import auth from '../middlewares/Auth';
 
 const docCtrl = {
 
@@ -9,9 +9,16 @@ const docCtrl = {
     * Route: POST: /documents/
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void|Object} response object or void
     */
   create(req, res) {
+    const { title, content } = dms.validateDocumentsInput(req);
+    if (!title) {
+      return res.status(400).send({ message: 'Title field cannot be empty' });
+    }
+    if (!content) {
+      return res.status(400).send({ message: 'Content field cannot be empty' });
+    }
     db.Document
       .create(dms.getDocumentData(req))
        .then((document) => {
@@ -25,7 +32,7 @@ const docCtrl = {
     * Route: GET: /documents/
     * @param {Object} req request object
     * @param {Object} res response object
-    * @returns {void} no returns
+    * @returns {void} response object or void
     */
   getAll(req, res) {
     let query = {};

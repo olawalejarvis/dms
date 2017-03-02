@@ -54,7 +54,7 @@ describe('ROLE API', () => {
           done();
         });
     });
-    it('should return error when no title is set by admin', (done) => {
+    it('should return error for empty string title', (done) => {
       superRequest.post('/roles')
         .send({ title: '' })
         .set({ 'x-access-token': adminToken })
@@ -65,7 +65,7 @@ describe('ROLE API', () => {
           done();
         });
     });
-    it('should return error when invalid or no token is set', (done) => {
+    it('should return varification failed when no token is supplied', (done) => {
       superRequest.post('/roles')
         .send(helper.testRoleG)
         .end((err, res) => {
@@ -119,7 +119,7 @@ describe('ROLE API', () => {
         });
     });
     it('should return id not found for invalid id', (done) => {
-      superRequest.delete('/roles/3')
+      superRequest.delete('/roles/999')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
@@ -151,9 +151,9 @@ describe('ROLE API', () => {
     it('should not allow regular user to get role', (done) => {
       superRequest.get(`/roles/${role.id}`)
         .set({ 'x-access-token': reguToken })
-        .end((er, re) => {
-          expect(re.status).to.equal(403);
-          expect(re.body.message).to.equal('permission denied');
+        .end((err, res) => {
+          expect(res.status).to.equal(403);
+          expect(res.body.message).to.equal('permission denied');
           done();
         });
     });
@@ -216,7 +216,7 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken });
       done();
     });
-    it('it should allow admin to get all users', (done) => {
+    it('it should allow admin to view all roles', (done) => {
       superRequest.get('/roles')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
@@ -226,7 +226,7 @@ describe('ROLE API', () => {
           done();
         });
     });
-    it('should not allow regular user to get all role', (done) => {
+    it('should not allow regular user to view all roles', (done) => {
       superRequest.get('/roles')
         .set({ 'x-access-token': reguToken })
         .end((er, re) => {
