@@ -105,11 +105,14 @@ const dms = {
    * @returns {Object} return an object
    */
   validateQueries(query) {
-    const searchArray = query.query ? query.query.toLowerCase().match(/\w+/g) : null;
+    const searchArray = query.query
+      ? query.query.toLowerCase().match(/\w+/g)
+      : null;
     const limit = query.limit || 20;
     const offset = query.offset || 0;
     const publishedDate = query.publishedDate;
-    const order = publishedDate && publishedDate === 'ASC' ? publishedDate : 'DESC';
+    const order =
+      publishedDate && publishedDate === 'ASC' ? publishedDate : 'DESC';
     return { limit, offset, order, searchArray };
   },
   /**

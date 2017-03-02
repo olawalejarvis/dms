@@ -37,13 +37,17 @@ describe('User API', () => {
           .end((error, response) => {
             regularUser = response.body.user;
             expect(response.status).to.equal(201);
-            expect(response.body.user.username).to.equal(helper.regularUser.username);
-            expect(response.body.user.firstname).to.equal(helper.regularUser.firstname);
-            expect(response.body.user.lastname).to.equal(helper.regularUser.lastname);
+            expect(response.body.user.username)
+              .to.equal(helper.regularUser.username);
+            expect(response.body.user.firstname)
+              .to.equal(helper.regularUser.firstname);
+            expect(response.body.user.lastname)
+              .to.equal(helper.regularUser.lastname);
             expect(response.body.user.roleId).to.equal(2);
             done();
           });
       });
+
       it('should fail when already existing email is supplied', (done) => {
         superRequest.post('/users')
           .send(helper.regularUser)
@@ -53,6 +57,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should fail for invalid email address', (done) => {
         superRequest.post('/users')
           .send(helper.invalidEmailUser)
@@ -64,16 +69,19 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should fail if password is less than 8', (done) => {
         superRequest.post('/users')
           .send(helper.invalidPasswordUser)
           .end((err, res) => {
             expect(res.status).to.equal(500);
-            expect(res.body[0].message).to.equal('Minimum of of 8 characters is required');
+            expect(res.body[0].message)
+              .to.equal('Minimum of of 8 characters is required');
             expect(res.body[0].type).to.equal('Validation error');
             done();
           });
       });
+
       it('should not allow admin user to sign up', (done) => {
         helper.firstUser.roleId = 1;
         superRequest.post('/users')
@@ -100,6 +108,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should allow other users to login', (done) => {
         superRequest.post('/users/login')
           .send(helper.regularUser)
@@ -111,6 +120,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should not allow unregistered users to login', (done) => {
         superRequest.post('/users/login')
           .send(helper.firstUser)
@@ -119,6 +129,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should not allow login with invalid password', (done) => {
         superRequest.post('/users/login')
           .send({ email: newAdminUser.email, password: 'invalid' })
@@ -128,7 +139,9 @@ describe('User API', () => {
             done();
           });
       });
-      it('should not allow login when email and password is not provided', (done) => {
+
+      it('should not allow login when email and password is not provided',
+      (done) => {
         superRequest.post('/users/login')
           .send({ })
           .end((err, res) => {
@@ -138,6 +151,7 @@ describe('User API', () => {
           });
       });
     });
+
     describe('Get all users, GET /users ', () => {
       it('should return verification failed if no token is supply', (done) => {
         superRequest.get('/users')
@@ -148,6 +162,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should return invalid token if token is invalid', (done) => {
         superRequest.get('/users')
           .set({ 'x-access-token': 'hello-andela-tia' })
@@ -157,7 +172,9 @@ describe('User API', () => {
             done();
           });
       });
-      it('should return permission denied if user is not an admin user', (done) => {
+
+      it('should return permission denied if user is not an admin user',
+      (done) => {
         superRequest.get('/users')
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
@@ -166,6 +183,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should allow admin to view users', (done) => {
         superRequest.get('/users')
           .set({ 'x-access-token': adminToken })
@@ -177,6 +195,7 @@ describe('User API', () => {
           });
       });
     });
+
     describe('Get user by Id GET /users/:id', () => {
       it('should return verification failed for unregistered user', (done) => {
         superRequest.get(`/users/${newAdminUser.id}`)
@@ -186,7 +205,9 @@ describe('User API', () => {
             done();
           });
       });
-      it('should return user\'s profile when valid user\'s id is supplied', (done) => {
+
+      it('should return user\'s profile when valid user\'s id is supplied',
+      (done) => {
         superRequest.get(`/users/${newAdminUser.id}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
@@ -197,6 +218,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should return not found for invalid user id', (done) => {
         superRequest.get('/users/9999')
           .set({ 'x-access-token': adminToken })
@@ -207,8 +229,10 @@ describe('User API', () => {
           });
       });
     });
+
     describe('Update user attributes PUT /users/:id', () => {
-      it('should update user\'s profile when valid user token is supplied', (done) => {
+      it('should update user\'s profile when valid user token is supplied',
+      (done) => {
         const updateData = {
           username: 'Olawale',
           lastname: 'Aladeusi',
@@ -225,6 +249,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should return not found for invalid user id', (done) => {
         const data = { username: 'wale', lastname: 'ala' };
         superRequest.put('/users/99999')
@@ -236,6 +261,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it(`should return permission denied when regular user want to
         update another user's profile`, (done) => {
         const data = { username: 'wale', lastname: 'ala' };
@@ -248,7 +274,9 @@ describe('User API', () => {
             done();
           });
       });
-      it('should give admin permission to update any user\'s profile', (done) => {
+
+      it('should give admin permission to update any user\'s profile',
+      (done) => {
         const data = { username: 'wale', lastname: 'ala' };
         superRequest.put(`/users/${regularUser.id}`)
           .send(data)
@@ -262,6 +290,7 @@ describe('User API', () => {
           });
       });
     });
+
     describe('Delete user DELETE /users/:id', () => {
       it('should not delete admin user', (done) => {
         superRequest.delete(`/users/${newAdminUser.id}`)
@@ -272,6 +301,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should return not found for invalid user id', (done) => {
         superRequest.delete('/users/2')
           .set({ 'x-access-token': adminToken })
@@ -280,6 +310,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('should fail when request is from a regular user', (done) => {
         superRequest.delete(`/users/${regularUser.id}`)
           .set({ 'x-access-token': regularToken })
@@ -289,6 +320,7 @@ describe('User API', () => {
             done();
           });
       });
+
       it('allow admin to delete a user', (done) => {
         superRequest.delete(`/users/${regularUser.id}`)
           .set({ 'x-access-token': adminToken })
@@ -299,14 +331,17 @@ describe('User API', () => {
           });
       });
     });
+
     describe('SEARCH USERS PAGINATION', () => {
       const arrayUsers = helper.usersArray();
       before((done) => {
         db.User.bulkCreate(arrayUsers);
         done();
       });
+
       it('should return search result', (done) => {
-        superRequest.get(`/users/search?query=${arrayUsers[0].firstname.substr(1, 6)}`)
+        superRequest.get(`/users/search?query=
+        ${arrayUsers[0].firstname.substr(1, 6)}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.body.message).to.equal('success');
@@ -316,6 +351,7 @@ describe('User API', () => {
           });
       });
     });
+
     describe('Logout', () => {
       it('should logout successfully', (done) => {
         superRequest.post('/users/logout')

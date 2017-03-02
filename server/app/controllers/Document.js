@@ -2,7 +2,7 @@ import db from '../models/index';
 import dms from '../controllers/Helper';
 import auth from '../middlewares/Auth';
 
-const docCtrl = {
+const Document = {
 
   /**
     * Create a new document
@@ -14,15 +14,18 @@ const docCtrl = {
   create(req, res) {
     const { title, content } = dms.validateDocumentsInput(req);
     if (!title) {
-      return res.status(400).send({ message: 'Title field cannot be empty' });
+      return res.status(400)
+        .send({ message: 'Title field cannot be empty' });
     }
     if (!content) {
-      return res.status(400).send({ message: 'Content field cannot be empty' });
+      return res.status(400)
+        .send({ message: 'Content field cannot be empty' });
     }
     db.Document
       .create(dms.getDocumentData(req))
        .then((document) => {
-         res.status(201).send({ message: 'success', document });
+         res.status(201)
+          .send({ message: 'success', document });
        })
        .catch(error => res.status(500).send(error.errors));
   },
@@ -41,21 +44,29 @@ const docCtrl = {
     } else {
       query.where = dms.docAccess(req);
     }
-    const { limit, offset, order } = dms.validateQueries(req.query);
+    const validQueries = dms.validateQueries(req.query);
 
-    if (!Number(limit) || Number(offset) === 'NaN') {
-      return res.status(400).send({ message: 'only number is allowed' });
+    if (!Number(validQueries.limit) || Number(validQueries.offset) === 'NaN') {
+      return res.status(400)
+        .send({ message: 'only number is allowed' });
     }
-    if (limit < 0 || offset < 0) {
-      return res.status(400).send({ message: 'negative number not allowed' });
+    if (validQueries.limit < 0 || validQueries.offset < 0) {
+      return res.status(400)
+        .send({ message: 'negative number not allowed' });
     }
 
-    query = dms.setLimitOffsetOrder(limit, offset, order, query);
+    query = dms.setLimitOffsetOrder(
+      validQueries.limit,
+      validQueries.offset,
+      validQueries.order,
+      query
+    );
 
     db.Document
       .findAll(query)
       .then((docs) => {
-        res.status(200).send({ message: 'success', docs });
+        res.status(200)
+          .send({ message: 'success', docs });
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -72,16 +83,20 @@ const docCtrl = {
       .findById(req.params.id)
       .then((doc) => {
         if (!doc) {
-          return res.status(404).send({ message: 'document not found' });
+          return res.status(404)
+            .send({ message: 'document not found' });
         }
         if (auth.isPublic(doc) || auth.isOwnerDoc(doc, req)
           || auth.isAdmin(req.tokenDecode.roleId)) {
-          return res.status(200).send({ message: 'success', doc });
+          return res.status(200)
+            .send({ message: 'success', doc });
         }
         if (auth.hasRoleAccess(doc, req)) {
-          return res.status(200).send({ message: 'success', doc });
+          return res.status(200)
+            .send({ message: 'success', doc });
         }
-        res.status(401).send({ message: 'permission denied' });
+        res.status(401)
+          .send({ message: 'permission denied' });
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -97,12 +112,17 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { return res.status(404).send({ message: 'document not found' }); }
+        if (!doc) {
+          return res.status(404)
+            .send({ message: 'document not found' });
+        }
         if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
           doc.update(req.body)
-          .then(updatedDocument => res.status(200).send({ message: 'success', updatedDocument }));
+          .then(updatedDocument => res.status(200)
+              .send({ message: 'success', updatedDocument }));
         } else {
-          res.status(401).send({ message: 'permission denied' });
+          res.status(401)
+            .send({ message: 'permission denied' });
         }
       })
       .catch(error => res.status(500).send(error.errors));
@@ -119,11 +139,18 @@ const docCtrl = {
     db.Document
       .findById(req.params.id)
       .then((doc) => {
-        if (!doc) { return res.status(404).send({ message: 'no document found' }); }
+        if (!doc) {
+          return res.status(404)
+            .send({ message: 'no document found' });
+        }
         if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
           doc.destroy()
-          .then(() => res.status(200).send({ message: 'document deleted' }));
-        } else { res.status(401).send({ message: 'permission denied' }); }
+          .then(() => res.status(200)
+            .send({ message: 'document deleted' }));
+        } else {
+          res.status(401)
+            .send({ message: 'permission denied' });
+        }
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -138,20 +165,22 @@ const docCtrl = {
   search(req, res) {
     const terms = [];
     let query = {};
-    const { limit, offset, order, searchArray } = dms.validateQueries(req.query);
+    const validQueries = dms.validateQueries(req.query);
 
-    if (!searchArray) {
+    if (!validQueries.searchArray) {
       return res.send({ message: 'enter search query' });
     }
 
-    if (!Number(limit) || Number(offset) === 'NaN') {
-      return res.status(400).send({ message: 'only number is allowed' });
+    if (!Number(validQueries.limit) || Number(validQueries.offset) === 'NaN') {
+      return res.status(400)
+        .send({ message: 'only number is allowed' });
     }
-    if (limit < 0 || offset < 0) {
-      return res.status(400).send({ message: 'negative number not allowed' });
+    if (validQueries.limit < 0 || validQueries.offset < 0) {
+      return res.status(400)
+        .send({ message: 'negative number not allowed' });
     }
 
-    searchArray.forEach((word) => {
+    validQueries.searchArray.forEach((word) => {
       terms.push(`%${word}%`);
     });
 
@@ -162,17 +191,28 @@ const docCtrl = {
         $and: [dms.docAccess(req), dms.likeSearch(terms)]
       };
     }
-    query = dms.setLimitOffsetOrder(limit, offset, order, query);
+    query = dms.setLimitOffsetOrder(
+      validQueries.limit,
+      validQueries.offset,
+      validQueries.order,
+      query
+    );
 
     db.Document
       .findAndCountAll(query)
       .then((docs) => {
-        const { next, currentPage } = dms.nextAndCurrentPage(docs.count, limit, offset);
-        res.status(200).send({ message: 'success', docs, next, currentPage });
+        const { next, currentPage } =
+          dms.nextAndCurrentPage(
+            docs.count,
+            validQueries.limit,
+            validQueries.offset
+          );
+        res.status(200)
+          .send({ message: 'success', docs, next, currentPage });
       })
       .catch(error => res.status(500).send(error.errors));
   }
 
 };
 
-export default docCtrl;
+export default Document;

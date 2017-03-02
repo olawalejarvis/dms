@@ -2,7 +2,7 @@ import db from '../models/index';
 import auth from '../middlewares/Auth';
 import dms from '../controllers/Helper';
 
-const userCtrl = {
+const User = {
   /**
     * Create a new user
     * Route: POST: /users
@@ -12,7 +12,8 @@ const userCtrl = {
     */
   create(req, res) {
     if (req.body.roleId && req.body.roleId === 1) {
-      return res.status(403).send({ message: 'permission denied' });
+      return res.status(403)
+        .send({ message: 'permission denied' });
     }
     const data = dms.getUserData(req.body);
     db.User
@@ -20,7 +21,8 @@ const userCtrl = {
       .then((user) => {
         const token = auth.getToken(user);
         user = dms.userProfile(user);
-        return res.status(201).send({ message: 'user created', token, user });
+        return res.status(201)
+          .send({ message: 'user created', token, user });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -49,9 +51,8 @@ const userCtrl = {
             user
           });
         }
-        res.status(401).send({
-          message: 'User varification failed'
-        });
+        res.status(401)
+          .send({ message: 'User varification failed' });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -64,7 +65,8 @@ const userCtrl = {
     * @returns {void} no returns
     */
   logout(req, res) {
-    res.status(200).send({ message: 'logged out' });
+    res.status(200)
+      .send({ message: 'logged out' });
   },
 
   /**
@@ -79,7 +81,8 @@ const userCtrl = {
       .findAll({ attributes: dms.getUserAttribute() })
       .then((users) => {
         if (users) {
-          res.status(200).send({ message: 'success', users });
+          res.status(200)
+            .send({ message: 'success', users });
         }
       })
       .catch(err => res.status(500).send(err.errors));
@@ -94,10 +97,14 @@ const userCtrl = {
     */
   getUser(req, res) {
     db.User
-      .findOne({ where: { id: req.params.id }, attributes: dms.getUserAttribute() })
+      .findOne({
+        where: { id: req.params.id },
+        attributes: dms.getUserAttribute()
+      })
       .then((user) => {
         if (user) {
-          return res.status(200).send({ message: 'success', user });
+          return res
+            .status(200).send({ message: 'success', user });
         }
         res.status(404).send({
           message: 'user not found'
@@ -115,7 +122,8 @@ const userCtrl = {
     */
   update(req, res) {
     if (!(auth.isAdmin(req.tokenDecode.roleId) || auth.isOwner(req))) {
-      return res.status(401).send({ message: 'Permission denied' });
+      return res.status(401)
+        .send({ message: 'Permission denied' });
     }
     db.User
       .findById(req.params.id)
@@ -124,12 +132,12 @@ const userCtrl = {
           user.update(req.body)
             .then((updatedUser) => {
               updatedUser = dms.userProfile(updatedUser);
-              res.status(200).send({ message: 'success', updatedUser });
+              res.status(200)
+                .send({ message: 'success', updatedUser });
             });
         } else {
-          res.status(404).send({
-            message: 'user not found'
-          });
+          res.status(404)
+            .send({ message: 'user not found' });
         }
       })
       .catch(err => res.status(500).send(err.errors));
@@ -150,17 +158,16 @@ const userCtrl = {
           if (!auth.isAdmin(user.roleId)) {
             user.destroy()
             .then(() => {
-              res.status(200).send({
-                message: 'deleted successfully'
-              });
+              res.status(200)
+                .send({ message: 'deleted successfully' });
             });
           } else {
-            res.status(403).send({ message: 'can not delete an admin user' });
+            res.status(403)
+              .send({ message: 'can not delete an admin user' });
           }
         } else {
-          res.status(404).send({
-            message: 'User not found'
-          });
+          res.status(404)
+          .send({ message: 'User not found' });
         }
       })
       .catch(err => res.status(500).send(err.errors));
@@ -187,8 +194,12 @@ const userCtrl = {
         attributes: dms.getUserAttribute()
       })
       .then((userDoc) => {
-        if (userDoc.length === 0) { return res.status(404).send({ message: 'no document found' }); }
-        res.status(200).send(userDoc[0]);
+        if (userDoc.length === 0) {
+          return res.status(404)
+            .send({ message: 'no document found' });
+        }
+        res.status(200)
+          .send(userDoc[0]);
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -202,18 +213,20 @@ const userCtrl = {
   search(req, res) {
     const terms = [];
     let query = {};
-    const { limit, offset, order, searchArray } = dms.validateQueries(req.query);
+    const validQueries = dms.validateQueries(req.query);
 
-    if (!searchArray) {
+    if (!validQueries.searchArray) {
       return res.send({ message: 'enter search query' });
     }
-    if (!Number(limit) || Number(offset) === 'NaN') {
-      return res.status(400).send({ message: 'only number is allowed' });
+    if (!Number(validQueries.limit) || Number(validQueries.offset) === 'NaN') {
+      return res.status(400)
+        .send({ message: 'only number is allowed' });
     }
-    if (limit < 0 || offset < 0) {
-      return res.status(400).send({ message: 'negative number not allowed' });
+    if (validQueries.limit < 0 || validQueries.offset < 0) {
+      return res.status(400)
+        .send({ message: 'negative number not allowed' });
     }
-    searchArray.forEach((word) => {
+    validQueries.searchArray.forEach((word) => {
       terms.push(`%${word}%`);
     });
 
@@ -225,16 +238,23 @@ const userCtrl = {
         { email: { $ilike: { $any: terms } } }
       ]
     };
-    query = dms.setLimitOffsetOrder(limit, offset, order, query);
+    query = dms.setLimitOffsetOrder(
+      validQueries.limit,
+      validQueries.offset,
+      validQueries.order,
+      query
+    );
     query.attributes = dms.getUserAttribute();
 
     db.User.findAndCountAll(query)
       .then((users) => {
-        const { next, currentPage } = dms.nextAndCurrentPage(users.count, limit, offset);
-        res.status(200).send({ message: 'success', users, next, currentPage });
+        const { next, currentPage } = dms.nextAndCurrentPage(
+            users.count, validQueries.limit, validQueries.offset);
+        res.status(200)
+          .send({ message: 'success', users, next, currentPage });
       });
   }
 
 };
 
-export default userCtrl;
+export default User;

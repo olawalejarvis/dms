@@ -65,7 +65,8 @@ describe('ROLE API', () => {
           done();
         });
     });
-    it('should return varification failed when no token is supplied', (done) => {
+    it('should return varification failed when no token is supplied',
+    (done) => {
       superRequest.post('/roles')
         .send(helper.testRoleG)
         .end((err, res) => {

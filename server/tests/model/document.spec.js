@@ -20,6 +20,7 @@ describe('Document Model', () => {
           });
       });
   });
+
   after((done) => { db.Role.destroy({ where: {} }); done(); });
 
   describe('CREATE Document', () => {
@@ -30,13 +31,15 @@ describe('Document Model', () => {
         .then((doc) => {
           userDocument = doc.dataValues;
           expect(doc.dataValues.title).to.equal(helper.publicDocument.title);
-          expect(doc.dataValues.content).to.equal(helper.publicDocument.content);
+          expect(doc.dataValues.content)
+            .to.equal(helper.publicDocument.content);
           expect(doc.dataValues).to.have.property('createdAt');
           expect(doc.dataValues.ownerId).to.equal(regularUser.id);
           done();
         });
     });
   });
+
   describe('Not Null Violation', () => {
     requiredFields.forEach((field) => {
       it('should return "not null Violation message"', (done) => {
@@ -54,6 +57,7 @@ describe('Document Model', () => {
       });
     });
   });
+
   describe('EMPTY STRING', () => {
     emptyFields.forEach((field) => {
       it('should return error', (done) => {
@@ -62,7 +66,8 @@ describe('Document Model', () => {
         db.Document.create(emptyString)
           .then()
           .catch((error) => {
-            expect(error.errors[0].message).to.equal('This field cannot be empty');
+            expect(error.errors[0].message)
+              .to.equal('This field cannot be empty');
             expect(error.errors[0].type).to.equal('Validation error');
             expect(error.errors[0].path).to.equal(field);
             done();
@@ -70,20 +75,24 @@ describe('Document Model', () => {
       });
     });
   });
+
   describe('ACCESS Violation', () => {
-    it('should return error when access is not public, private or role', (done) => {
+    it('should return error when access is not public, private or role',
+    (done) => {
       const accessError = Object.assign({}, helper.publicDocument);
       accessError.access = 'andela';
       db.Document.create(accessError)
         .then()
         .catch((error) => {
-          expect(error.errors[0].message).to.equal('public, private or role required');
+          expect(error.errors[0].message)
+            .to.equal('public, private or role required');
           expect(error.errors[0].type).to.equal('Validation error');
           expect(error.errors[0].path).to.equal('access');
           done();
         });
     });
   });
+
   describe('UPDATE Document', () => {
     let newDocument;
     beforeEach((done) => {
@@ -96,6 +105,7 @@ describe('Document Model', () => {
             });
         });
     });
+
     it('should give the correct result', (done) => {
       db.Document.findById(userDocument.id)
         .then((doc) => {

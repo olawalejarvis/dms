@@ -1,6 +1,6 @@
 import db from '../models/index';
 
-const roleCtrl = {
+const Role = {
 
   /**
     * Create a new role
@@ -13,7 +13,8 @@ const roleCtrl = {
     db.Role
       .create(req.body)
       .then((role) => {
-        res.status(200).send({ message: 'success', role });
+        res.status(201)
+          .send({ message: 'success', role });
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -29,7 +30,8 @@ const roleCtrl = {
     db.Role
       .findAll()
       .then((roles) => {
-        res.status(200).send({ message: 'success', roles });
+        res.status(200)
+        .send({ message: 'success', roles });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -45,10 +47,14 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
+        if (!role) {
+          return res.status(404)
+          .send({ message: 'role not found' });
+        }
         role.update(req.body)
         .then((updatedRole) => {
-          res.status(200).send({ message: 'success', updatedRole });
+          res.status(200)
+            .send({ message: 'success', updatedRole });
         });
       })
       .catch(err => res.status(500).send(err.errors));
@@ -65,10 +71,14 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
+        if (!role) {
+          return res.status(404)
+            .send({ message: 'role not found' });
+        }
         role.destroy()
         .then(() => {
-          res.status(200).send({ message: 'role deleted' });
+          res.status(200)
+            .send({ message: 'role deleted' });
         });
       })
       .catch(err => res.status(500).send(err.errors));
@@ -85,11 +95,15 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
-        res.status(200).send({ message: 'success', role });
+        if (!role) {
+          return res.status(404)
+            .send({ message: 'role not found' });
+        }
+        res.status(200)
+         .send({ message: 'success', role });
       })
       .catch(err => res.status(500).send(err.errors));
   }
 };
 
-export default roleCtrl;
+export default Role;

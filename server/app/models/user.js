@@ -68,7 +68,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     validate: {
       validatePassword() {
-        if (this.password.length !== null && (!(/\w+/g.test(this.password)) || (this.password.length < 8))) {
+        if (this.password.length !== null && (!(/\w+/g.test(this.password))
+          || (this.password.length < 8))) {
           throw new Error('Minimum of of 8 characters is required');
         }
       }

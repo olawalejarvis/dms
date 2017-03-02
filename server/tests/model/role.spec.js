@@ -21,6 +21,7 @@ describe('ROLE', () => {
           done();
         });
     });
+
     it('should fail when role title already exist', (done) => {
       const newRole = { title: 'guest' };
       db.Role.create(newRole)
@@ -34,6 +35,7 @@ describe('ROLE', () => {
         });
     });
   });
+
   describe('NOT NULL violation', () => {
     it('should fail when title of a role is null', (done) => {
       const nullTitle = { title: null };
@@ -47,6 +49,7 @@ describe('ROLE', () => {
         });
     });
   });
+
   describe('EMPTY String violation', () => {
     it('should fail for empty string title', (done) => {
       const emptyTitle = { title: ' ' };
@@ -55,11 +58,13 @@ describe('ROLE', () => {
         .catch((error) => {
           expect(error.errors[0].message).to.equal('Input a valid title');
           expect(error.errors[0].type).to.equal('Validation error');
-          expect(error.errors[1].message).to.equal('This field cannot be empty');
+          expect(error.errors[1].message)
+            .to.equal('This field cannot be empty');
           done();
         });
     });
   });
+
   describe('Update Role', () => {
     let newRole;
     before((done) => {
@@ -72,6 +77,7 @@ describe('ROLE', () => {
             });
         });
     });
+
     it('should update a role', (done) => {
       db.Role.findById(newRole.id)
         .then((role) => {
@@ -82,6 +88,7 @@ describe('ROLE', () => {
         });
     });
   });
+
   describe('DELETE role', () => {
     it('should delete a role', (done) => {
       db.Role.destroy({ where: { id: guestRole.id } })

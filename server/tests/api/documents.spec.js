@@ -51,9 +51,11 @@ describe('DOCUMENT API', () => {
           });
       });
   });
+
   after(() => {
     db.Role.destroy({ where: {} });
   });
+
   describe('CREATE DOCUMENT POST /documents', () => {
     it('should create a new document', (done) => {
       superRequest.post('/documents')
@@ -67,7 +69,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return varification failed when token is not supplied', (done) => {
+
+    it('should return varification failed when token is not supplied',
+    (done) => {
       superRequest.post('/documents')
         .send(publicD)
         .end((err, res) => {
@@ -76,6 +80,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should not create document when title is not supplied', (done) => {
       const invalidDoc = { content: 'new document' };
       superRequest.post('/documents')
@@ -89,6 +94,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should not create document when content is not supplied', (done) => {
       const invalidDoc = { title: 'new document' };
       superRequest.post('/documents')
@@ -102,7 +108,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should not create document when empty string title is supplied', (done) => {
+
+    it('should not create document when empty string title is supplied',
+    (done) => {
       const invalidDoc = { title: '' };
       superRequest.post('/documents')
         .send(invalidDoc)
@@ -114,6 +122,7 @@ describe('DOCUMENT API', () => {
         });
     });
   });
+
   describe('Update Document /documents/:id', () => {
     before((done) => {
       superRequest.post('/documents')
@@ -124,6 +133,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should update document when user is the owner', (done) => {
       updateDoc = { title: 'andela' };
       superRequest.put(`/documents/${createdDoc.id}`)
@@ -136,6 +146,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should allow admin to update document', (done) => {
       updateDoc = { title: 'TIA' };
       superRequest.put(`/documents/${createdDoc.id}`)
@@ -148,6 +159,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should not update document when user is not the owner', (done) => {
       updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put(`/documents/${createdDoc.id}`)
@@ -159,6 +171,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should not update document when token is not supplied', (done) => {
       updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put(`/documents/${createdDoc.id}`)
@@ -169,6 +182,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return not found when invalid id is supplied', (done) => {
       updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put('/documents/9999')
@@ -181,6 +195,7 @@ describe('DOCUMENT API', () => {
         });
     });
   });
+
   describe('Delete Document DELETE /documents/:id', () => {
     beforeEach((done) => {
       superRequest.post('/documents')
@@ -191,6 +206,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should allow document\'s owner to delete document', (done) => {
       superRequest.delete(`/documents/${document.id}`)
         .set({ 'x-access-token': regularToken2 })
@@ -200,6 +216,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should allow admin to delete any document', (done) => {
       superRequest.delete(`/documents/${document.id}`)
         .set({ 'x-access-token': adminToken })
@@ -209,6 +226,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should not delete document if requester is not the owner', (done) => {
       superRequest.delete(`/documents/${document.id}`)
         .set({ 'x-access-token': regularToken })
@@ -218,6 +236,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return not found when for invlid id', (done) => {
       superRequest.delete('/documents/999')
         .set({ 'x-access-token': regularToken2 })
@@ -228,6 +247,7 @@ describe('DOCUMENT API', () => {
         });
     });
   });
+
   describe('GET document /documents/:id', () => {
     describe('GET document with PRIVATE access', () => {
       before((done) => {
@@ -239,7 +259,9 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
-      it('should ONLY return the document when the user is the owner', (done) => {
+
+      it('should ONLY return the document when the user is the owner',
+      (done) => {
         superRequest.get(`/documents/${privateDocument.id}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
@@ -250,7 +272,9 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
-      it('should allow admin to retrieve document with private access level', (done) => {
+
+      it('should allow admin to retrieve document with private access level',
+      (done) => {
         superRequest.get(`/documents/${privateDocument.id}`)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
@@ -261,6 +285,7 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
+
       it('should NOT return document when user is not the owner', (done) => {
         superRequest.get(`/documents/${privateDocument.id}`)
           .set({ 'x-access-token': regularToken2 })
@@ -271,6 +296,7 @@ describe('DOCUMENT API', () => {
           });
       });
     });
+
     describe('PUBLIC DOCUMENT', () => {
       before((done) => {
         superRequest.post('/documents')
@@ -281,6 +307,7 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
+
       it('should return document to all users', (done) => {
         superRequest.get(`/documents/${publicDocument.id}`)
           .set({ 'x-access-token': regularToken })
@@ -292,7 +319,9 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
-      it('should return document not found when invalid id is supplied', (done) => {
+
+      it('should return document not found when invalid id is supplied',
+      (done) => {
         superRequest.get('/documents/99999')
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
@@ -302,6 +331,7 @@ describe('DOCUMENT API', () => {
           });
       });
     });
+
     describe('ROLE ACCESS DOCUMENT', () => {
       let guestToken;
       before((done) => {
@@ -322,7 +352,9 @@ describe('DOCUMENT API', () => {
               });
           });
       });
-      it('should ONLY return document when user has same role as owner', (done) => {
+
+      it('should ONLY return document when user has same role as owner',
+      (done) => {
         superRequest.get(`/documents/${roleDocument.id}`)
           .set({ 'x-access-token': regularToken2 })
           .end((err, res) => {
@@ -333,7 +365,9 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
-      it('should allow admin to view all role level access documents', (done) => {
+
+      it('should allow admin to view all role level access documents',
+      (done) => {
         superRequest.get(`/documents/${roleDocument.id}`)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
@@ -344,6 +378,7 @@ describe('DOCUMENT API', () => {
             done();
           });
       });
+
       it('should not return document if not of the same role level', (done) => {
         superRequest.get(`/documents/${roleDocument.id}`)
           .set({ 'x-access-token': guestToken })
@@ -355,6 +390,7 @@ describe('DOCUMENT API', () => {
       });
     });
   });
+
   describe('GET ALL DOCUMENT PAGINATION', () => {
     it('should return all documents to admin user', (done) => {
       superRequest.get('/documents')
@@ -368,6 +404,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it(`should return all documents created by a user irrespective of the
     access level and every other documents with role or puclic access with
     limit set to 4`, (done) => {
@@ -387,23 +424,30 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all documents in order of their respective published date', (done) => {
+
+    it(`should return all documents in order of their respective
+      published date`, (done) => {
       superRequest.get('/documents')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body.message).to.equal('success');
           for (let i = 0; i < res.body.docs.length - 1; i += 1) {
-            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            const flag = compareDates(
+              res.body.docs[i].createdAt,
+              res.body.docs[1 + i].createdAt
+            );
             expect(flag).to.equal(false);
           }
           done();
         });
     });
   });
+
   describe('DOCUMENT SEARCH PAGINATION', () => {
     it('should return search results', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}`)
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -416,8 +460,11 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all search results to admin', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}`)
+
+    it('should return all search results to admin',
+    (done) => {
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -427,8 +474,10 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should allow multiple search terms', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -441,8 +490,11 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all multiple search\'s terms results to admin', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
+
+    it('should return all multiple search\'s terms results to admin',
+    (done) => {
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -452,7 +504,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return "enter search string" when search query is not supplied', (done) => {
+
+    it('should return "enter search string" when search query is not supplied',
+    (done) => {
       superRequest.get('/documents/search')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
@@ -460,8 +514,10 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return error for negative limit', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=-2`)
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}&limit=-2`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
@@ -469,8 +525,10 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return error for negative offset', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=2&offset=-2`)
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}&limit=2&offset=-2`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
@@ -478,8 +536,10 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return error when limit entered is string', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&limit=aaa`)
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}&limit=aaa`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
@@ -487,29 +547,42 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return documents in order of their respective published date', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&publishedDate=DESC`)
+
+    it('should return documents in order of their respective published date',
+    (done) => {
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}&publishedDate=DESC`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           for (let i = 0; i < res.body.docs.length - 1; i += 1) {
-            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            const flag = compareDates(
+              res.body.docs[i].createdAt,
+              res.body.docs[1 + i].createdAt
+            );
             expect(flag).to.equal(false);
           }
           done();
         });
     });
-    it('should return documents in ascending order of published date', (done) => {
-      superRequest.get(`/documents/search?query=${publicD.content.substr(2, 6)}&publishedDate=ASC`)
+
+    it('should return documents in ascending order of published date',
+    (done) => {
+      superRequest.get(`/documents/search?query=
+      ${publicD.content.substr(2, 6)}&publishedDate=ASC`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           for (let i = 0; i < res.body.docs.length - 1; i += 1) {
-            const flag = compareDates(res.body.docs[i].createdAt, res.body.docs[1 + i].createdAt);
+            const flag = compareDates(
+              res.body.docs[i].createdAt,
+              res.body.docs[1 + i].createdAt
+            );
             expect(flag).to.equal(true);
           }
           done();
         });
     });
   });
+
   describe('Fetch all user\'s document', () => {
     it('should return all documents created by a particular user', (done) => {
       superRequest.get(`/users/${regularUser.id}/documents`)
@@ -526,7 +599,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all documents created by a particular user to admin user', (done) => {
+
+    it('should return all documents created by a particular user to admin user',
+    (done) => {
       superRequest.get(`/users/${regularUser.id}/documents`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
@@ -541,7 +616,9 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
-    it('should return all public or role access level documents to a requester user', (done) => {
+
+    it(`should return all public or role access level
+    documents to a requester user`, (done) => {
       superRequest.get(`/users/${regularUser.id}/documents`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
@@ -560,6 +637,7 @@ describe('DOCUMENT API', () => {
           done();
         });
     });
+
     it('should return no document found for invalid id', (done) => {
       superRequest.get('/users/0/documents')
         .set({ 'x-access-token': regularToken })
