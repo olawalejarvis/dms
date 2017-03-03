@@ -1,6 +1,6 @@
 import db from '../models/index';
+import Auth from '../middlewares/Auth';
 import dms from '../controllers/Helper';
-import auth from '../middlewares/Auth';
 
 const Document = {
 
@@ -12,20 +12,15 @@ const Document = {
     * @returns {void|Object} response object or void
     */
   create(req, res) {
-    const { title, content } = dms.validateDocumentsInput(req);
-    if (!title) {
-      return res.status(400)
-        .send({ message: 'Title field cannot be empty' });
-    }
-    if (!content) {
-      return res.status(400)
-        .send({ message: 'Content field cannot be empty' });
-    }
     db.Document
-      .create(dms.getDocumentData(req))
+      .create(req.docInput)
        .then((document) => {
          res.status(201)
-          .send({ message: 'success', document });
+          .send({
+            success: true,
+            message: 'Your document has been successfully created',
+            document
+          });
        })
        .catch(error => res.status(500).send(error.errors));
   },
@@ -38,35 +33,22 @@ const Document = {
     * @returns {void} response object or void
     */
   getAll(req, res) {
-    let query = {};
-    if (auth.isAdmin(req.tokenDecode.roleId)) {
-      query.where = {};
-    } else {
-      query.where = dms.docAccess(req);
-    }
-    const validQueries = dms.validateQueries(req.query);
-
-    if (!Number(validQueries.limit) || Number(validQueries.offset) === 'NaN') {
-      return res.status(400)
-        .send({ message: 'only number is allowed' });
-    }
-    if (validQueries.limit < 0 || validQueries.offset < 0) {
-      return res.status(400)
-        .send({ message: 'negative number not allowed' });
-    }
-
-    query = dms.setLimitOffsetOrder(
-      validQueries.limit,
-      validQueries.offset,
-      validQueries.order,
-      query
-    );
-
     db.Document
-      .findAll(query)
-      .then((docs) => {
+      .findAndCountAll(req.dmsFilter)
+      .then((documents) => {
+        const condition = {
+          count: documents.count,
+          limit: req.dmsFilter.limit,
+          offset: req.dmsFilter.offset
+        };
+        const pagnation = dms.pagnation(condition);
         res.status(200)
-          .send({ message: 'success', docs });
+          .send({
+            success: true,
+            message: 'You have successfully retrieved all documents',
+            documents,
+            pagnation
+          });
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -81,22 +63,37 @@ const Document = {
   getDocument(req, res) {
     db.Document
       .findById(req.params.id)
-      .then((doc) => {
-        if (!doc) {
+      .then((document) => {
+        if (!document) {
           return res.status(404)
-            .send({ message: 'document not found' });
+            .send({
+              success: false,
+              message: 'This document cannot be found'
+            });
         }
-        if (auth.isPublic(doc) || auth.isOwnerDoc(doc, req)
-          || auth.isAdmin(req.tokenDecode.roleId)) {
+        if (Auth.isPublic(document) || Auth.isOwnerDoc(document, req)
+          || Auth.isAdmin(req.tokenDecode.roleId)) {
           return res.status(200)
-            .send({ message: 'success', doc });
+            .send({
+              success: true,
+              message: 'You have successfully retrived this document',
+              document
+            });
         }
-        if (auth.hasRoleAccess(doc, req)) {
+        if (Auth.hasRoleAccess(document, req)) {
           return res.status(200)
-            .send({ message: 'success', doc });
+            .send({
+              success: true,
+              message: 'You have successfully retrived this document',
+              document
+            });
         }
         res.status(401)
-          .send({ message: 'permission denied' });
+          .send({
+            success: false,
+            message: `This is a private document, 
+              you are not permmitted to view it`
+          });
       })
       .catch(error => res.status(500).send(error.errors));
   },
@@ -109,22 +106,13 @@ const Document = {
     * @returns {void} no returns
     */
   update(req, res) {
-    db.Document
-      .findById(req.params.id)
-      .then((doc) => {
-        if (!doc) {
-          return res.status(404)
-            .send({ message: 'document not found' });
-        }
-        if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
-          doc.update(req.body)
-          .then(updatedDocument => res.status(200)
-              .send({ message: 'success', updatedDocument }));
-        } else {
-          res.status(401)
-            .send({ message: 'permission denied' });
-        }
-      })
+    req.updateDoc.update(req.body)
+      .then(updatedDocument => res.status(200)
+        .send({
+          success: true,
+          message: 'This document has been updated successfully',
+          updatedDocument
+        }))
       .catch(error => res.status(500).send(error.errors));
   },
 
@@ -136,22 +124,13 @@ const Document = {
     * @returns {void} no returns
     */
   detele(req, res) {
-    db.Document
-      .findById(req.params.id)
-      .then((doc) => {
-        if (!doc) {
-          return res.status(404)
-            .send({ message: 'no document found' });
-        }
-        if (auth.isOwnerDoc(doc, req) || auth.isAdmin(req.tokenDecode.roleId)) {
-          doc.destroy()
-          .then(() => res.status(200)
-            .send({ message: 'document deleted' }));
-        } else {
-          res.status(401)
-            .send({ message: 'permission denied' });
-        }
-      })
+    req.docInstance.destroy()
+      .then(() => res.status(200)
+         .send({
+           success: true,
+           message: 'This document has been deleted successfully'
+         })
+      )
       .catch(error => res.status(500).send(error.errors));
   },
 
@@ -163,52 +142,22 @@ const Document = {
     * @returns {void|Response} response object or void
     */
   search(req, res) {
-    const terms = [];
-    let query = {};
-    const validQueries = dms.validateQueries(req.query);
-
-    if (!validQueries.searchArray) {
-      return res.send({ message: 'enter search query' });
-    }
-
-    if (!Number(validQueries.limit) || Number(validQueries.offset) === 'NaN') {
-      return res.status(400)
-        .send({ message: 'only number is allowed' });
-    }
-    if (validQueries.limit < 0 || validQueries.offset < 0) {
-      return res.status(400)
-        .send({ message: 'negative number not allowed' });
-    }
-
-    validQueries.searchArray.forEach((word) => {
-      terms.push(`%${word}%`);
-    });
-
-    if (auth.isAdmin(req.tokenDecode.roleId)) {
-      query.where = dms.likeSearch(terms);
-    } else {
-      query.where = {
-        $and: [dms.docAccess(req), dms.likeSearch(terms)]
-      };
-    }
-    query = dms.setLimitOffsetOrder(
-      validQueries.limit,
-      validQueries.offset,
-      validQueries.order,
-      query
-    );
-
     db.Document
-      .findAndCountAll(query)
-      .then((docs) => {
-        const { next, currentPage } =
-          dms.nextAndCurrentPage(
-            docs.count,
-            validQueries.limit,
-            validQueries.offset
-          );
+      .findAndCountAll(req.dmsFilter)
+      .then((documents) => {
+        const condition = {
+          count: documents.count,
+          limit: req.dmsFilter.limit,
+          offset: req.dmsFilter.offset
+        };
+        const pagnation = dms.pagnation(condition);
         res.status(200)
-          .send({ message: 'success', docs, next, currentPage });
+          .send({
+            success: true,
+            message: 'This search was successfull',
+            documents,
+            pagnation
+          });
       })
       .catch(error => res.status(500).send(error.errors));
   }

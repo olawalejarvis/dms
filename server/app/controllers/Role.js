@@ -44,18 +44,10 @@ const Role = {
     * @returns {void} no returns
     */
   update(req, res) {
-    db.Role
-      .findById(req.params.id)
-      .then((role) => {
-        if (!role) {
-          return res.status(404)
-          .send({ message: 'role not found' });
-        }
-        role.update(req.body)
-        .then((updatedRole) => {
-          res.status(200)
-            .send({ message: 'success', updatedRole });
-        });
+    req.roleInstance.update(req.body)
+      .then((updatedRole) => {
+        res.status(200)
+          .send({ message: 'success', updatedRole });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -68,18 +60,10 @@ const Role = {
     * @returns {void} no returns
     */
   delete(req, res) {
-    db.Role
-      .findById(req.params.id)
-      .then((role) => {
-        if (!role) {
-          return res.status(404)
-            .send({ message: 'role not found' });
-        }
-        role.destroy()
-        .then(() => {
-          res.status(200)
-            .send({ message: 'role deleted' });
-        });
+    req.roleInstance.destroy()
+      .then(() => {
+        res.status(200)
+          .send({ message: 'role deleted' });
       })
       .catch(err => res.status(500).send(err.errors));
   },

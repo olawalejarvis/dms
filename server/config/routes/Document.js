@@ -5,14 +5,26 @@ import Auth from '../../app/middlewares/Auth';
 const docRouter = express.Router();
 
 docRouter.route('/')
-  .post(Auth.verifyToken, Document.create)
-  .get(Auth.verifyToken, Document.getAll);
+  .post(Auth.verifyToken,
+    Auth.validateDocumentsInput,
+    Document.create)
+  .get(Auth.verifyToken,
+    Auth.validateSearch,
+    Document.getAll);
 
-docRouter.get('/search', Auth.verifyToken, Document.search);
+docRouter.get('/search',
+  Auth.verifyToken,
+  Auth.validateSearch,
+  Document.search);
 
 docRouter.route('/:id')
-  .get(Auth.verifyToken, Document.getDocument)
-  .put(Auth.verifyToken, Document.update)
-  .delete(Auth.verifyToken, Document.detele);
+  .get(Auth.verifyToken,
+    Document.getDocument)
+  .put(Auth.verifyToken,
+    Auth.hasDocumentPermission,
+    Document.update)
+  .delete(Auth.verifyToken,
+    Auth.hasDocumentPermission,
+    Document.detele);
 
 export default docRouter;
