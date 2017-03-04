@@ -32,6 +32,10 @@ module.exports = {
           key: 'id'
         }
       },
+      active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

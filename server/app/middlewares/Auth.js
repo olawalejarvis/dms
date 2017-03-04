@@ -17,15 +17,32 @@ const Auth = {
     if (token) {
       jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-          res.status(401)
+          return res.status(401)
             .send({
               success: false,
               message: 'The token you supplied has expired'
             });
-        } else {
-          req.tokenDecode = decoded;
-          next();
         }
+        db.User.findById(decoded.userId)
+          .then((user) => {
+            if (!user) {
+              return res.status(404)
+                .send({
+                  success: false,
+                  message: 'Account not found, Sign Up or sign in to get access'
+                });
+            }
+            if (!user.active) {
+              return res.status(401)
+                .send({
+                  success: false,
+                  message: 'Please sign in to access your account'
+                });
+            }
+            req.tokenDecode = decoded;
+            req.tokenDecode.roleId = user.roleId;
+            next();
+          });
       });
     } else {
       res.status(400)
@@ -116,8 +133,7 @@ const Auth = {
    */
   getToken(user) {
     const userToken = jwt.sign({
-      userId: user.id,
-      roleId: user.roleId
+      userId: user.id
     },
       secretKey, { expiresIn: '7d' }
     );
@@ -259,6 +275,15 @@ const Auth = {
           success: false,
           message: 'You are not permitted to update this profile'
         });
+    }
+    if (!!req.body.roleId && req.body.roleId === '1') {
+      if (!Auth.isAdmin(req.tokenDecode.roleId)) {
+        return res.status(403)
+          .send({
+            success: false,
+            message: 'You are not permitted to update role to admin'
+          });
+      }
     }
     db.User.findById(req.params.id)
       .then((user) => {

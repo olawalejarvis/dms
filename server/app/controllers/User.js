@@ -44,6 +44,7 @@ const User = {
       .findOne({ where: { email: req.body.email } })
       .then((user) => {
         if (user && user.validPassword(req.body.password)) {
+          user.update({ active: true });
           const token = Auth.getToken(user);
           user = dms.getUserProfile(user);
           return res.status(200)
@@ -71,10 +72,14 @@ const User = {
     * @returns {void} no returns
     */
   logout(req, res) {
-    res.status(200)
-      .send({
-        success: true,
-        message: 'You have successfully logged out'
+    db.User.findById(req.tokenDecode.userId)
+      .then((user) => {
+        user.update({ active: false });
+        return res.status(200)
+          .send({
+            success: true,
+            message: 'You have successfully logged out'
+          });
       });
   },
 
@@ -185,7 +190,7 @@ const User = {
         res.status(200)
           .send({
             success: true,
-            message: 'This account has beed successfully deleted'
+            message: 'This account has bee successfully deleted'
           });
       })
       .catch(err => res.status(500).send(err.errors));
