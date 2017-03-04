@@ -1,4 +1,5 @@
 import db from '../models/index';
+import dms from '../Helper';
 
 const Role = {
 
@@ -14,9 +15,18 @@ const Role = {
       .create(req.body)
       .then((role) => {
         res.status(201)
-          .send({ message: 'success', role });
+          .send({
+            success: true,
+            message: 'Role has been created',
+            role
+          });
       })
-      .catch(error => res.status(500).send(error.errors));
+      .catch(error =>
+        res.status(400)
+          .send({
+            success: false,
+            errorArray: dms.errorArray(error)
+          }));
   },
 
   /**
@@ -31,7 +41,11 @@ const Role = {
       .findAll()
       .then((roles) => {
         res.status(200)
-        .send({ message: 'success', roles });
+        .send({
+          success: true,
+          message: 'You have successfully retrived all roles',
+          roles
+        });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -47,9 +61,18 @@ const Role = {
     req.roleInstance.update(req.body)
       .then((updatedRole) => {
         res.status(200)
-          .send({ message: 'success', updatedRole });
+          .send({
+            success: true,
+            message: 'This role has been updated',
+            updatedRole
+          });
       })
-      .catch(err => res.status(500).send(err.errors));
+      .catch(error =>
+        res.status(400)
+          .send({
+            success: false,
+            errorArray: dms.errorArray(error)
+          }));
   },
 
   /**
@@ -63,7 +86,10 @@ const Role = {
     req.roleInstance.destroy()
       .then(() => {
         res.status(200)
-          .send({ message: 'role deleted' });
+          .send({
+            success: true,
+            message: 'This role has been deleted'
+          });
       })
       .catch(err => res.status(500).send(err.errors));
   },
@@ -81,10 +107,17 @@ const Role = {
       .then((role) => {
         if (!role) {
           return res.status(404)
-            .send({ message: 'role not found' });
+            .send({
+              success: false,
+              message: 'This role does not exist'
+            });
         }
         res.status(200)
-         .send({ message: 'success', role });
+         .send({
+           success: true,
+           message: 'This role has been retrieved successfully',
+           role
+         });
       })
       .catch(err => res.status(500).send(err.errors));
   }

@@ -75,8 +75,10 @@ describe('DOCUMENT API', () => {
       superRequest.post('/documents')
         .send(publicD)
         .end((err, res) => {
-          expect(res.status).to.equal(401);
-          expect(res.body.message).to.equal('verification failed');
+          expect(res.status).to.equal(400);
+          expect(res.body.success).to.equal(false);
+          expect(res.body.message).to
+            .equal('Please sign in or register to get a token');
           done();
         });
     });
@@ -87,10 +89,8 @@ describe('DOCUMENT API', () => {
         .send(invalidDoc)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(500);
-          expect(res.body[0].message).to.equal('title cannot be null');
-          expect(res.body[0].type).to.equal('notNull Violation');
-          expect(res.body[0].value).to.equal(null);
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('Title field is required');
           done();
         });
     });
@@ -101,23 +101,23 @@ describe('DOCUMENT API', () => {
         .send(invalidDoc)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(500);
-          expect(res.body[0].message).to.equal('content cannot be null');
-          expect(res.body[0].type).to.equal('notNull Violation');
-          expect(res.body[0].value).to.equal(null);
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('Content field is required');
           done();
         });
     });
 
-    it('should not create document when empty string title is supplied',
+    it('should not create document when an unknow access level is provided',
     (done) => {
-      const invalidDoc = { title: '' };
+      const invalidDoc =
+      { title: 'hello', content: 'new Andela', access: 'new' };
       superRequest.post('/documents')
         .send(invalidDoc)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.message).to.equal('Title field cannot be empty');
+          expect(res.body.message).to
+            .equal('Access type can only be public, private or role');
           done();
         });
     });
@@ -167,18 +167,20 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(401);
-          expect(res.body.message).to.equal('permission denied');
+          expect(res.body.message)
+            .to.equal('You are not permitted to modify this document');
           done();
         });
     });
 
-    it('should not update document when token is not supplied', (done) => {
+    it('should not update document when token is not supply', (done) => {
       updateDoc = { content: 'new life, new culture, new community' };
       superRequest.put(`/documents/${createdDoc.id}`)
         .send(updateDoc)
         .end((err, res) => {
-          expect(res.status).to.equal(401);
-          expect(res.body.message).to.equal('verification failed');
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to
+            .equal('Please sign in or register to get a token');
           done();
         });
     });
@@ -190,7 +192,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('document not found');
+          expect(res.body.message).to.equal('This document does not exist');
           done();
         });
     });
@@ -212,7 +214,8 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('document deleted');
+          expect(res.body.message)
+            .to.equal('This document has been deleted successfully');
           done();
         });
     });
@@ -222,17 +225,20 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('document deleted');
+          expect(res.body.message).to
+            .equal('This document has been deleted successfully');
           done();
         });
     });
 
-    it('should not delete document if requester is not the owner', (done) => {
+    it('should not delete document if requester is not the owner or admin',
+    (done) => {
       superRequest.delete(`/documents/${document.id}`)
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
           expect(res.status).to.equal(401);
-          expect(res.body.message).to.equal('permission denied');
+          expect(res.body.message).to
+            .equal('You are not permitted to modify this document');
           done();
         });
     });
@@ -242,7 +248,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('no document found');
+          expect(res.body.message).to.equal('This document does not exist');
           done();
         });
     });
@@ -266,9 +272,11 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('success');
-            expect(res.body.doc.title).to.equal(privateDocument.title);
-            expect(res.body.doc.access).to.equal('private');
+            expect(res.body.message).to
+              .equal('You have successfully retrived this document');
+            expect(res.body.document.title).to.equal(privateDocument.title);
+            expect(res.body.document.access).to.equal('private');
+            expect(res.body.document.ownerId).to.equal(regularUser.id);
             done();
           });
       });
@@ -279,9 +287,10 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('success');
-            expect(res.body.doc.title).to.equal(privateDocument.title);
-            expect(res.body.doc.access).to.equal('private');
+            expect(res.body.message).to
+              .equal('You have successfully retrived this document');
+            expect(res.body.document.title).to.equal(privateDocument.title);
+            expect(res.body.document.access).to.equal('private');
             done();
           });
       });
@@ -291,7 +300,8 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': regularToken2 })
           .end((err, res) => {
             expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('permission denied');
+            expect(res.body.message).to
+              .equal('You are not permitted to view this document');
             done();
           });
       });
@@ -313,9 +323,10 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.doc.title).to.equal(publicDocument.title);
-            expect(res.body.doc.access).to.equal('public');
-            expect(res.body.message).to.equal('success');
+            expect(res.body.document.title).to.equal(publicDocument.title);
+            expect(res.body.document.access).to.equal('public');
+            expect(res.body.message).to
+              .equal('You have successfully retrived this document');
             done();
           });
       });
@@ -326,7 +337,7 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(404);
-            expect(res.body.message).to.equal('document not found');
+            expect(res.body.message).to.equal('This document cannot be found');
             done();
           });
       });
@@ -359,9 +370,10 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': regularToken2 })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.doc.title).to.equal(roleDocument.title);
-            expect(res.body.doc.access).to.equal('role');
-            expect(res.body.message).to.equal('success');
+            expect(res.body.document.title).to.equal(roleDocument.title);
+            expect(res.body.document.access).to.equal('role');
+            expect(res.body.message).to
+              .equal('You have successfully retrived this document');
             done();
           });
       });
@@ -372,9 +384,10 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.doc.title).to.equal(roleDocument.title);
-            expect(res.body.doc.access).to.equal('role');
-            expect(res.body.message).to.equal('success');
+            expect(res.body.document.title).to.equal(roleDocument.title);
+            expect(res.body.document.access).to.equal('role');
+            expect(res.body.message).to
+              .equal('You have successfully retrived this document');
             done();
           });
       });
@@ -384,7 +397,8 @@ describe('DOCUMENT API', () => {
           .set({ 'x-access-token': guestToken })
           .end((err, res) => {
             expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('permission denied');
+            expect(res.body.message).to
+              .equal('You are not permitted to view this document');
             done();
           });
       });
@@ -397,10 +411,26 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('success');
-          res.body.docs.forEach((doc) => {
+          expect(res.body.message).to
+            .equal('You have successfully retrieved all documents');
+          expect(res.body.documents.count).to.be.greaterThan(0);
+          res.body.documents.rows.forEach((doc) => {
             expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
           });
+          done();
+        });
+    });
+
+    it('should return all documents with pagnation', (done) => {
+      superRequest.get('/documents?limit=4&offset=3')
+        .set({ 'x-access-token': adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.documents.count).to.be.greaterThan(0);
+          expect(res.body.pagnation.page_count).to.equal(2);
+          expect(res.body.pagnation.Page).to.equal(1);
+          expect(res.body.pagnation.page_size).to.equal('4');
+          expect(res.body.pagnation.total_count).to.equal(7);
           done();
         });
     });
@@ -411,31 +441,29 @@ describe('DOCUMENT API', () => {
       superRequest.get('/documents?limit=4')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
-          expect(res.body.docs.length).to.equal(4);
+          expect(res.body.documents.count).to.greaterThan(0);
           expect(res.status).to.equal(200);
-          res.body.docs.forEach((doc) => {
+          res.body.documents.rows.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
               expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
             } else {
               expect(doc.access).to.be.oneOf(['role', 'public']);
             }
           });
-          expect(res.body.message).to.equal('success');
           done();
         });
     });
 
-    it(`should return all documents in order of their respective
+    it(`should return all documents in descending order of their respective
       published date`, (done) => {
       superRequest.get('/documents')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('success');
-          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+          for (let i = 0; i < res.body.documents.rows.length - 1; i += 1) {
             const flag = compareDates(
-              res.body.docs[i].createdAt,
-              res.body.docs[1 + i].createdAt
+              res.body.documents.rows[i].createdAt,
+              res.body.documents.rows[1 + i].createdAt
             );
             expect(flag).to.equal(false);
           }
@@ -451,12 +479,12 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.rows.forEach((doc) => {
+          res.body.documents.rows.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
               expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
             } else { expect(doc.access).to.be.oneOf(['public', 'role']); }
           });
-          expect(res.body.message).to.equal('success');
+          expect(res.body.message).to.equal('This search was successfull');
           done();
         });
     });
@@ -468,7 +496,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.rows.forEach((doc) => {
+          res.body.documents.rows.forEach((doc) => {
             expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
           });
           done();
@@ -481,26 +509,26 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.rows.forEach((doc) => {
+          res.body.documents.rows.forEach((doc) => {
             if (doc.ownerId === regularUser2.id) {
               expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
             } else { expect(doc.access).to.be.oneOf(['public', 'role']); }
           });
-          expect(res.body.message).to.equal('success');
           done();
         });
     });
 
-    it('should return all multiple search\'s terms results to admin',
-    (done) => {
+    it('should return all documents with pagnation', (done) => {
       superRequest.get(`/documents/search?query=
       ${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          res.body.docs.rows.forEach((doc) => {
-            expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
-          });
+          expect(res.body.documents.count).to.be.greaterThan(0);
+          expect(res.body.pagnation.page_count).to.be.greaterThan(0);
+          expect(res.body.pagnation.Page).to.be.greaterThan(0);
+          expect(res.body.pagnation.page_size).to.greaterThan(0);
+          expect(res.body.pagnation.total_count).to.be.greaterThan(0);
           done();
         });
     });
@@ -510,7 +538,8 @@ describe('DOCUMENT API', () => {
       superRequest.get('/documents/search')
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
-          expect(res.body.message).to.equal('enter search query');
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('Please enter a search query');
           done();
         });
     });
@@ -521,7 +550,8 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.message).to.equal('negative number not allowed');
+          expect(res.body.message).to
+            .equal('Only positive number is allowed for limit value');
           done();
         });
     });
@@ -532,7 +562,8 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.message).to.equal('negative number not allowed');
+          expect(res.body.message).to
+            .equal('Only positive number is allowed for offset value');
           done();
         });
     });
@@ -543,7 +574,8 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.message).to.equal('only number is allowed');
+          expect(res.body.message).to
+            .equal('Only positive number is allowed for limit value');
           done();
         });
     });
@@ -554,10 +586,10 @@ describe('DOCUMENT API', () => {
       ${publicD.content.substr(2, 6)}&publishedDate=DESC`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
-          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+          for (let i = 0; i < res.body.documents.rows.length - 1; i += 1) {
             const flag = compareDates(
-              res.body.docs[i].createdAt,
-              res.body.docs[1 + i].createdAt
+              res.body.documents.rows[i].createdAt,
+              res.body.documents.rows[1 + i].createdAt
             );
             expect(flag).to.equal(false);
           }
@@ -571,10 +603,10 @@ describe('DOCUMENT API', () => {
       ${publicD.content.substr(2, 6)}&publishedDate=ASC`)
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
-          for (let i = 0; i < res.body.docs.length - 1; i += 1) {
+          for (let i = 0; i < res.body.documents.rows.length - 1; i += 1) {
             const flag = compareDates(
-              res.body.docs[i].createdAt,
-              res.body.docs[1 + i].createdAt
+              res.body.documents.rows[i].createdAt,
+              res.body.documents.rows[1 + i].createdAt
             );
             expect(flag).to.equal(true);
           }
@@ -589,11 +621,11 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.id).to.equal(regularUser.id);
-          expect(res.body.email).to.equal(regularUser.email);
-          expect(res.body.Documents.length).to.be.greaterThan(0);
-          res.body.Documents.forEach((doc) => {
-            expect(doc.ownerId).to.equal(regularUser.id);
+          expect(res.body.userDocuments.user.id).to.equal(regularUser.id);
+          expect(res.body.userDocuments.documents.rows.length)
+            .to.be.greaterThan(0);
+          expect(res.body.userDocuments.documents.count).to.be.greaterThan(0);
+          res.body.userDocuments.documents.rows.forEach((doc) => {
             expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
           });
           done();
@@ -606,12 +638,12 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.id).to.equal(regularUser.id);
-          expect(res.body.email).to.equal(regularUser.email);
-          expect(res.body.Documents.length).to.be.greaterThan(0);
-          res.body.Documents.forEach((doc) => {
-            expect(doc.ownerId).to.equal(regularUser.id);
-            expect(doc.access).to.be.oneOf(['role', 'private', 'public']);
+          expect(res.body.userDocuments.user.id).to.equal(regularUser.id);
+          expect(res.body.userDocuments.documents.rows.length)
+            .to.be.greaterThan(0);
+          expect(res.body.userDocuments.documents.count).to.be.greaterThan(0);
+          res.body.userDocuments.documents.rows.forEach((doc) => {
+            expect(doc.access).to.be.oneOf(['public', 'role', 'private']);
           });
           done();
         });
@@ -623,16 +655,10 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken2 })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.id).to.equal(regularUser.id);
-          expect(res.body.email).to.equal(regularUser.email);
-          expect(res.body.Documents.length).to.be.greaterThan(0);
-          res.body.Documents.forEach((doc) => {
-            expect(doc.ownerId).to.equal(regularUser.id);
-            if (doc.ownerRoleId === regularUser2.roleId) {
-              expect(doc.access).to.be.oneOf(['role', 'public']);
-            } else {
-              expect(doc.access).to.equal('public');
-            }
+          expect(res.body.userDocuments.user.id).to.equal(regularUser.id);
+          expect(res.body.userDocuments.documents.count).to.be.greaterThan(0);
+          res.body.userDocuments.documents.rows.forEach((doc) => {
+            expect(doc.access).to.be.oneOf(['role', 'public']);
           });
           done();
         });
@@ -643,7 +669,7 @@ describe('DOCUMENT API', () => {
         .set({ 'x-access-token': regularToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('no document found');
+          expect(res.body.message).to.equal('This user does not exist');
           done();
         });
     });

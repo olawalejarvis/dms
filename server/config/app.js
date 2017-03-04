@@ -23,4 +23,8 @@ app.use('/users', userRouter);
 app.use('/documents', docRouter);
 app.use('/roles', roleRouter);
 
+app.get('*', (req, res) => {
+  res.status(404).send({ message: 'REQUEST PAGE NOT FOUND' });
+});
+
 export default app;

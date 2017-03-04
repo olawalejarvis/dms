@@ -1,6 +1,6 @@
 import db from '../models/index';
 import Auth from '../middlewares/Auth';
-import dms from '../controllers/Helper';
+import dms from '../Helper';
 
 const User = {
   /**
@@ -24,7 +24,12 @@ const User = {
             user
           });
       })
-      .catch(err => res.status(500).send(err.errors));
+      .catch(error =>
+        res.status(400)
+          .send({
+            success: false,
+            errorArray: dms.errorArray(error)
+          }));
   },
 
   /**
@@ -52,8 +57,7 @@ const User = {
         res.status(401)
           .send({
             success: false,
-            message: `Your account cannot be verified, 
-             Please enter a valid email or password`
+            message: 'Please enter a valid email or password to log in'
           });
       })
       .catch(err => res.status(500).send(err.errors));
@@ -70,7 +74,7 @@ const User = {
     res.status(200)
       .send({
         success: true,
-        message: 'You have successfully logout'
+        message: 'You have successfully logged out'
       });
   },
 
@@ -149,7 +153,7 @@ const User = {
     req.userInstance.update(req.body)
       .then((updatedUser) => {
         updatedUser = dms.getUserProfile(updatedUser);
-        res.status(200)
+        return res.status(200)
           .send({
             success: true,
             message: 'Your profile has been updated',
@@ -252,6 +256,7 @@ const User = {
         pagnation = dms.pagnation(condition);
         res.status(200)
           .send({
+            success: true,
             message: 'Your search was successful',
             users,
             pagnation

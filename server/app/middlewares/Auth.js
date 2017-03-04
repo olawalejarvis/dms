@@ -20,8 +20,7 @@ const Auth = {
           res.status(401)
             .send({
               success: false,
-              message: `The token you supplied has expired, 
-              please login to your account to generate a new token`
+              message: 'The token you supplied has expired'
             });
         } else {
           req.tokenDecode = decoded;
@@ -29,11 +28,10 @@ const Auth = {
         }
       });
     } else {
-      res.status(401)
+      res.status(400)
         .send({
           success: false,
-          message: `Your token cannot be verified, 
-           please register or sign in to your account`
+          message: 'Please sign in or register to get a token'
         });
     }
   },
@@ -146,12 +144,39 @@ const Auth = {
     let email = /\S+@\S+\.\S+/.test(req.body.email);
     let password = /\w+/g.test(req.body.password);
 
-    if (!username || !firstname || !lastname || !email || !password) {
+    if (!username) {
       return res.status(400)
         .send({
           success: false,
-          message: `Enter a valid username, 
-          firstname, lastname, email or password`
+          message: 'Enter a valid username'
+        });
+    }
+    if (!firstname) {
+      return res.status(400)
+        .send({
+          success: false,
+          message: 'Enter a valid firstname'
+        });
+    }
+    if (!lastname) {
+      return res.status(400)
+        .send({
+          success: false,
+          message: 'Enter a valid lastname'
+        });
+    }
+    if (!email) {
+      return res.status(400)
+        .send({
+          success: false,
+          message: 'Enter a valid email'
+        });
+    }
+    if (!password) {
+      return res.status(400)
+        .send({
+          success: false,
+          message: 'Enter a valid password'
         });
     }
     if (req.body.password && req.body.password.length < 8) {
@@ -168,8 +193,7 @@ const Auth = {
           return res.status(409)
             .send({
               success: false,
-              message: `The email you are registering with has been used 
-              by another user, Please provide another email`
+              message: 'email already exist'
             });
         }
         db.User.findOne({ where: { username: req.body.username } })
@@ -178,8 +202,7 @@ const Auth = {
               return res.status(409)
                 .send({
                   success: false,
-                  message: `Username already exist, 
-                  Please provide another username`
+                  message: 'username already exist'
                 });
             }
             username = req.body.username;
@@ -187,7 +210,9 @@ const Auth = {
             lastname = req.body.lastname;
             email = req.body.email;
             password = req.body.password;
-            req.userInput = { username, firstname, lastname, email, password };
+            const roleId = req.body.roleId || 2;
+            req.userInput =
+            { username, firstname, lastname, roleId, email, password };
             next();
           });
       });
@@ -241,16 +266,8 @@ const Auth = {
           return res.status(404)
             .send({
               success: false,
-              message: 'This user cannot be found'
+              message: 'This user does not exist'
             });
-        }
-        if (!Auth.isAdmin(req.tokenDecode.roleId)) {
-          req.body = {
-            username: req.body.username,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            password: req.body.password
-          };
         }
         req.userInstance = user;
         next();
@@ -268,10 +285,10 @@ const Auth = {
     db.User.findById(req.params.id)
       .then((user) => {
         if (!user) {
-          res.status(404)
+          return res.status(404)
             .send({
               success: false,
-              message: 'This user cannot be found'
+              message: 'This user does not exist'
             });
         }
         if (Auth.isAdmin(user.roleId) && user.id === 1) {
@@ -334,6 +351,13 @@ const Auth = {
     query.order = [['createdAt', order]];
 
     if (`${req.baseUrl}${req.route.path}` === '/users/search') {
+      if (!req.query.query) {
+        return res.status(400)
+          .send({
+            success: false,
+            message: 'Please enter a search query'
+          });
+      }
       query.where = {
         $or: [
           { username: { $ilike: { $any: terms } } },
@@ -349,6 +373,13 @@ const Auth = {
         : { id: req.tokenDecode.userId };
     }
     if (`${req.baseUrl}${req.route.path}` === '/documents/search') {
+      if (!req.query.query) {
+        return res.status(400)
+          .send({
+            success: false,
+            message: 'Please enter a search query'
+          });
+      }
       if (Auth.isAdmin(req.tokenDecode.roleId)) {
         query.where = Auth.likeSearch(terms);
       } else {
@@ -384,12 +415,18 @@ const Auth = {
   validateDocumentsInput(req, res, next) {
     const title = /\w+/g.test(req.body.title);
     const content = /\w+/g.test(req.body.content);
-    if (!req.body.title || !req.body.title) {
+    if (!req.body.title) {
       return res.status(400)
         .send({
           success: false,
-          message: `Title field and Content field is 
-          required to create a document`
+          message: 'Title field is required'
+        });
+    }
+    if (!req.body.content) {
+      return res.status(400)
+        .send({
+          success: false,
+          message: 'Content field is required'
         });
     }
     if (!title) {
@@ -411,8 +448,7 @@ const Auth = {
       return res.status(400)
         .send({
           success: false,
-          message: `Please enter a valid access type,
-          access type can only be public, private or role`
+          message: 'Access type can only be public, private or role'
         });
     }
     req.docInput = {
@@ -438,12 +474,12 @@ const Auth = {
           return res.status(404)
             .send({
               success: false,
-              message: 'This document not found'
+              message: 'This document does not exist'
             });
         }
         if (!Auth.isOwnerDoc(doc, req)
-          || !Auth.isAdmin(req.tokenDecode.roleId)) {
-          res.status(401)
+          && !Auth.isAdmin(req.tokenDecode.roleId)) {
+          return res.status(401)
             .send({
               success: false,
               message: 'You are not permitted to modify this document'
@@ -461,13 +497,13 @@ const Auth = {
    * @returns {void|Object} response object or void
    */
   modifyRolePermission(req, res, next) {
-    db.Role.findById(req.params.is)
+    db.Role.findById(req.params.id)
       .then((role) => {
         if (!role) {
           return res.status(404)
             .send({
               success: false,
-              message: 'This role cannot be found'
+              message: 'This role does not exist'
             });
         }
         if (Auth.isAdmin(role.id) || Auth.isRegular(role.id)) {

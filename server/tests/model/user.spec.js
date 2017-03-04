@@ -61,7 +61,7 @@ describe('User Model', () => {
         .then()
         .catch((error) => {
           expect(error.errors[0].message)
-            .to.equal('Minimum of of 8 characters is required');
+            .to.equal('Minimum of 8 characters is required');
           expect(error.errors[0].type).to.equal('Validation error');
           expect(error.errors[0].path).to.equal('validatePassword');
           done();
@@ -96,8 +96,6 @@ describe('User Model', () => {
           .catch((error) => {
             expect(error.errors[0].message).to.equal(`${field} cannot be null`);
             expect(error.errors[0].type).to.equal('notNull Violation');
-            expect(error.errors[0].path).to.equal(field);
-            expect(error.errors[0].value).to.equal(null);
             done();
           });
       });

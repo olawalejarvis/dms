@@ -1,6 +1,6 @@
 import db from '../models/index';
 import Auth from '../middlewares/Auth';
-import dms from '../controllers/Helper';
+import dms from '../Helper';
 
 const Document = {
 
@@ -91,8 +91,7 @@ const Document = {
         res.status(401)
           .send({
             success: false,
-            message: `This is a private document, 
-              you are not permmitted to view it`
+            message: 'You are not permitted to view this document'
           });
       })
       .catch(error => res.status(500).send(error.errors));
@@ -106,7 +105,7 @@ const Document = {
     * @returns {void} no returns
     */
   update(req, res) {
-    req.updateDoc.update(req.body)
+    req.docInstance.update(req.body)
       .then(updatedDocument => res.status(200)
         .send({
           success: true,

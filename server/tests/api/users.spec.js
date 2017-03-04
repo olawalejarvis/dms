@@ -11,6 +11,8 @@ let newAdminUser;
 let adminToken;
 let regularToken;
 let regularUser;
+const emptyValue = ['username', 'lastname', 'firstname', 'password', 'email'];
+const uniqueField = ['username', 'email'];
 
 describe('User API', () => {
   before((done) => {
@@ -48,36 +50,46 @@ describe('User API', () => {
           });
       });
 
-      it('should fail when already existing email is supplied', (done) => {
-        superRequest.post('/users')
-          .send(helper.regularUser)
-          .end((err, res) => {
-            expect(res.status).to.equal(500);
-            expect(res.body[0].type).to.equal('unique violation');
-            done();
-          });
+      uniqueField.forEach((field) => {
+        const uniqueUser = Object.assign({}, helper.firstUser);
+        uniqueUser[field] = helper.regularUser[field];
+        it(`should fail when already existing ${field} is supplied`, (done) => {
+          superRequest.post('/users')
+            .send(uniqueUser)
+            .end((err, res) => {
+              expect(res.status).to.equal(409);
+              expect(res.body.success).to.equal(false);
+              expect(res.body.message).to
+                .equal(`${field} already exist`);
+              done();
+            });
+        });
       });
 
-      it('should fail for invalid email address', (done) => {
-        superRequest.post('/users')
-          .send(helper.invalidEmailUser)
-          .end((err, res) => {
-            expect(res.status).to.equal(500);
-            expect(res.body[0].message).to.equal('Input a valid email address');
-            expect(res.body[0].type).to.equal('Validation error');
-            expect(res.body[0].path).to.equal('email');
-            done();
-          });
+      emptyValue.forEach((field) => {
+        const invalidUser = Object.assign({}, helper.secondUser);
+        invalidUser[field] = '';
+        it(`should fail when ${field} is invalid`, (done) => {
+          superRequest.post('/users')
+            .send(invalidUser)
+            .end((err, res) => {
+              expect(res.status).to.equal(400);
+              expect(res.body.success).to.equal(false);
+              expect(res.body.message).to
+                .equal(`Enter a valid ${field}`);
+              done();
+            });
+        });
       });
 
       it('should fail if password is less than 8', (done) => {
         superRequest.post('/users')
           .send(helper.invalidPasswordUser)
           .end((err, res) => {
-            expect(res.status).to.equal(500);
-            expect(res.body[0].message)
-              .to.equal('Minimum of of 8 characters is required');
-            expect(res.body[0].type).to.equal('Validation error');
+            expect(res.status).to.equal(400);
+            expect(res.body.message)
+              .to.equal('Minimum of 8 characters is allowed for password');
+            expect(res.body.success).to.equal(false);
             done();
           });
       });
@@ -88,7 +100,9 @@ describe('User API', () => {
           .send(helper.firstUser)
           .end((err, res) => {
             expect(res.status).to.equal(403);
-            expect(res.body.message).to.equal('permission denied');
+            expect(res.body.message).to
+              .equal('Permission denied, You cannot sign up as an admin user');
+            expect(res.body.success).to.equal(false);
             done();
           });
       });
@@ -104,7 +118,8 @@ describe('User API', () => {
             adminToken = res.body.token;
             expect(res.status).to.equal(200);
             expect(res.body.token).to.not.equal(null);
-            expect(res.body.message).to.equal('logged in');
+            expect(res.body.message).to
+              .equal('You have successfully logged in');
             done();
           });
       });
@@ -116,7 +131,8 @@ describe('User API', () => {
             regularToken = res.body.token;
             expect(res.status).to.equal(200);
             expect(res.body.token).to.not.equal(null);
-            expect(res.body.message).to.equal('logged in');
+            expect(res.body.message).to
+              .equal('You have successfully logged in');
             done();
           });
       });
@@ -126,6 +142,8 @@ describe('User API', () => {
           .send(helper.firstUser)
           .end((err, res) => {
             expect(res.status).to.equal(401);
+            expect(res.body.message).to
+              .equal('Please enter a valid email or password to log in');
             done();
           });
       });
@@ -135,7 +153,8 @@ describe('User API', () => {
           .send({ email: newAdminUser.email, password: 'invalid' })
           .end((err, res) => {
             expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('User varification failed');
+            expect(res.body.message).to
+              .equal('Please enter a valid email or password to log in');
             done();
           });
       });
@@ -145,8 +164,10 @@ describe('User API', () => {
         superRequest.post('/users/login')
           .send({ })
           .end((err, res) => {
-            expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('User varification failed');
+            expect(res.body.success).to.equal(false);
+            expect(res.status).to.equal(400);
+            expect(res.body.message).to
+              .equal('Please provide your email and password to login');
             done();
           });
       });
@@ -157,8 +178,9 @@ describe('User API', () => {
         superRequest.get('/users')
           .set({ })
           .end((err, res) => {
-            expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('verification failed');
+            expect(res.status).to.equal(400);
+            expect(res.body.message).to
+              .equal('Please sign in or register to get a token');
             done();
           });
       });
@@ -168,29 +190,37 @@ describe('User API', () => {
           .set({ 'x-access-token': 'hello-andela-tia' })
           .end((err, res) => {
             expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('invalid token');
+            expect(res.body.message).to
+              .equal('The token you supplied has expired');
             done();
           });
       });
 
-      it('should return permission denied if user is not an admin user',
-      (done) => {
+      it(`should return users own profile, 
+      when the requester is a regular user`, (done) => {
         superRequest.get('/users')
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
-            expect(res.status).to.equal(403);
-            expect(res.body.message).to.equal('permission denied');
+            expect(res.status).to.equal(200);
+            expect(res.body.message).to
+              .equal('You have successfully retrived all users');
+            expect(res.body.users.count).to.equal(1);
+            expect(res.body.users.rows[0].username).to
+              .equal(helper.regularUser.username);
             done();
           });
       });
 
-      it('should allow admin to view users', (done) => {
+      it(`should return all users profile, 
+      when the requester is an admin user`, (done) => {
         superRequest.get('/users')
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.users.length).to.be.greaterThan(0);
-            expect(res.body.message).to.equal('success');
+            expect(res.body.message).to
+              .equal('You have successfully retrived all users');
+            expect(res.body.users.count).to.equal(2);
+            expect(res.body.success).to.equal(true);
             done();
           });
       });
@@ -200,8 +230,9 @@ describe('User API', () => {
       it('should return verification failed for unregistered user', (done) => {
         superRequest.get(`/users/${newAdminUser.id}`)
           .end((err, res) => {
-            expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('verification failed');
+            expect(res.status).to.equal(400);
+            expect(res.body.message).to
+              .equal('Please sign in or register to get a token');
             done();
           });
       });
@@ -224,7 +255,7 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(404);
-            expect(res.body.message).to.equal('user not found');
+            expect(res.body.message).to.equal('This user does not exist');
             done();
           });
       });
@@ -243,9 +274,36 @@ describe('User API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('success');
+            expect(res.body.message).to.equal('Your profile has been updated');
             expect(res.body.updatedUser.username).to.equal('Olawale');
             expect(res.body.updatedUser.lastname).to.equal('Aladeusi');
+            done();
+          });
+      });
+
+      it('should return error when passing a null field', (done) => {
+        superRequest.put(`/users/${regularUser.id}`)
+          .send({ username: '' })
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(400);
+            expect(res.body.success).to.equal(false);
+            expect(res.body.errorArray[0].message).to
+              .equal('Input a valid username');
+            done();
+          });
+      });
+
+      it('should return error when updating with an existing username',
+      (done) => {
+        superRequest.put(`/users/${regularUser.id}`)
+          .send({ username: helper.adminUser.username })
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(400);
+            expect(res.body.success).to.equal(false);
+            expect(res.body.errorArray[0].message)
+              .to.equal('username already exist');
             done();
           });
       });
@@ -257,7 +315,7 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(404);
-            expect(res.body.message).to.equal('user not found');
+            expect(res.body.message).to.equal('This user does not exist');
             done();
           });
       });
@@ -270,7 +328,8 @@ describe('User API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(401);
-            expect(res.body.message).to.equal('Permission denied');
+            expect(res.body.message).to
+              .equal('You are not permitted to update this profile');
             done();
           });
       });
@@ -283,7 +342,8 @@ describe('User API', () => {
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('success');
+            expect(res.body.message).to
+              .equal('Your profile has been updated');
             expect(res.body.updatedUser.username).to.equal('wale');
             expect(res.body.updatedUser.lastname).to.equal('ala');
             done();
@@ -292,20 +352,31 @@ describe('User API', () => {
     });
 
     describe('Delete user DELETE /users/:id', () => {
-      it('should not delete admin user', (done) => {
-        superRequest.delete(`/users/${newAdminUser.id}`)
-          .set({ 'x-access-token': adminToken })
+      let newUser;
+      before((done) => {
+        superRequest.post('/users')
+          .send(helper.thirdUser)
           .end((err, res) => {
-            expect(res.status).to.equal(403);
-            expect(res.body.message).to.equal('can not delete an admin user');
+            newUser = res.body.user;
             done();
           });
       });
+      // it('should not delete admin user', (done) => {
+      //   superRequest.delete(`/users/${newAdminUser.id}`)
+      //     .set({ 'x-access-token': adminToken })
+      //     .end((err, res) => {
+      //       expect(res.status).to.equal(403);
+      //       expect(res.body.message).to
+      //         .equal('You can not delete the default admin user');
+      //       done();
+      //     });
+      // });
 
       it('should return not found for invalid user id', (done) => {
-        superRequest.delete('/users/2')
+        superRequest.delete('/users/999')
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
+            expect(res.body.message).to.equal('This user does not exist');
             expect(res.status).to.equal(404);
             done();
           });
@@ -316,17 +387,19 @@ describe('User API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(403);
-            expect(res.body.message).to.equal('permission denied');
+            expect(res.body.message).to
+              .equal('You are not permitted to perform this action');
             done();
           });
       });
 
       it('allow admin to delete a user', (done) => {
-        superRequest.delete(`/users/${regularUser.id}`)
+        superRequest.delete(`/users/${newUser.id}`)
           .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('deleted successfully');
+            expect(res.body.message).to
+              .equal('This account has beed successfully deleted');
             done();
           });
       });
@@ -344,9 +417,22 @@ describe('User API', () => {
         ${arrayUsers[0].firstname.substr(1, 6)}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
-            expect(res.body.message).to.equal('success');
-            expect(res.body).to.have.property('next');
-            expect(res.body).to.have.property('currentPage');
+            expect(res.body.message).to.equal('Your search was successful');
+            done();
+          });
+      });
+
+      it('should return search result with pagnation', (done) => {
+        superRequest.get(`/users/search?query=
+        ${arrayUsers[0].firstname.substr(1, 6)} 
+        ${arrayUsers[2].firstname.substr(1, 6)}`)
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.body.message).to.equal('Your search was successful');
+            expect(res.body.pagnation).to.have.property('page_count');
+            expect(res.body.pagnation).to.have.property('Page');
+            expect(res.body.pagnation).to.have.property('page_size');
+            expect(res.body.pagnation).to.have.property('total_count');
             done();
           });
       });
@@ -358,7 +444,8 @@ describe('User API', () => {
         .set({ 'x-access-token': adminToken })
           .end((err, res) => {
             expect(res.status).to.equal(200);
-            expect(res.body.message).to.equal('logged out');
+            expect(res.body.message).to
+              .equal('You have successfully logged out');
             done();
           });
       });

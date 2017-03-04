@@ -74,7 +74,14 @@ const dms = {
       'createdAt',
       'updatedAt'
     ];
-  }
+  },
+  errorArray(error) {
+    const errorArray = [];
+    error.errors.forEach((err) => {
+      errorArray.push({ path: err.path, message: err.message });
+    });
+    return errorArray;
+  },
 
 };
 
