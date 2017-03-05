@@ -74,12 +74,13 @@ const User = {
   logout(req, res) {
     db.User.findById(req.tokenDecode.userId)
       .then((user) => {
-        user.update({ active: false });
-        return res.status(200)
-          .send({
-            success: true,
-            message: 'You have successfully logged out'
-          });
+        user.update({ active: false })
+          .then(() =>
+            res.status(200)
+              .send({
+                success: true,
+                message: 'You have successfully logged out'
+              }));
       });
   },
 
@@ -190,7 +191,7 @@ const User = {
         res.status(200)
           .send({
             success: true,
-            message: 'This account has bee successfully deleted'
+            message: 'This account has been successfully deleted'
           });
       })
       .catch(err => res.status(500).send(err.errors));

@@ -16,7 +16,7 @@ const uniqueField = ['username', 'email'];
 
 describe('User API', () => {
   before((done) => {
-    db.Role.bulkCreate([helper.testRoleA, helper.testRoleR])
+    db.Role.bulkCreate([{ title: 'admin', id: 1 }, { title: 'regular', id: 2 }])
     .then((role) => {
       helper.adminUser.roleId = role[0].id;
       db.User.create(helper.adminUser)
@@ -361,16 +361,6 @@ describe('User API', () => {
             done();
           });
       });
-      // it('should not delete admin user', (done) => {
-      //   superRequest.delete(`/users/${newAdminUser.id}`)
-      //     .set({ 'x-access-token': adminToken })
-      //     .end((err, res) => {
-      //       expect(res.status).to.equal(403);
-      //       expect(res.body.message).to
-      //         .equal('You can not delete the default admin user');
-      //       done();
-      //     });
-      // });
 
       it('should return not found for invalid user id', (done) => {
         superRequest.delete('/users/999')
@@ -399,7 +389,7 @@ describe('User API', () => {
           .end((err, res) => {
             expect(res.status).to.equal(200);
             expect(res.body.message).to
-              .equal('This account has beed successfully deleted');
+              .equal('This account has been successfully deleted');
             done();
           });
       });
@@ -446,6 +436,16 @@ describe('User API', () => {
             expect(res.status).to.equal(200);
             expect(res.body.message).to
               .equal('You have successfully logged out');
+            done();
+          });
+      });
+      it('should not allow user to get user after logout', (done) => {
+        superRequest.get('/users')
+        .set({ 'x-access-token': adminToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body.message).to
+              .equal('Please sign in to access your account');
             done();
           });
       });

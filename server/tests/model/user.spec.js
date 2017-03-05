@@ -18,7 +18,7 @@ describe('User Model', () => {
   let regularUser;
 
   before((done) => {
-    db.Role.create(helper.testRoleR).then(() => {
+    db.Role.create({ title: 'regular', id: 2 }).then(() => {
       done();
     });
   });

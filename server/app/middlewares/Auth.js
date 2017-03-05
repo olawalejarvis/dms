@@ -269,6 +269,13 @@ const Auth = {
    * @returns {void|Object} response object or void
    * */
   validateUserUpdate(req, res, next) {
+    if (req.params.id === '1') {
+      return res.status(403)
+        .send({
+          success: false,
+          message: 'You are not permitted to modify the default admin user'
+        });
+    }
     if (!(Auth.isAdmin(req.tokenDecode.roleId) || Auth.isOwner(req))) {
       return res.status(401)
         .send({
@@ -284,6 +291,13 @@ const Auth = {
             message: 'You are not permitted to update role to admin'
           });
       }
+    }
+    if (req.body.id) {
+      return res.status(403)
+        .send({
+          success: false,
+          message: 'You are not permitted to update your id'
+        });
     }
     db.User.findById(req.params.id)
       .then((user) => {
@@ -421,10 +435,13 @@ const Auth = {
       }
     }
     if (`${req.baseUrl}${req.route.path}` === '/users/:id/documents') {
+      const adminSearch = req.query.query ? Auth.likeSearch(terms) : { };
+      const userSearch = req.query.query
+        ? [Auth.docAccess(req), Auth.likeSearch(terms)] : Auth.docAccess(req);
       if (Auth.isAdmin(req.tokenDecode.roleId)) {
-        query.where = {};
+        query.where = adminSearch;
       } else {
-        query.where = Auth.docAccess(req);
+        query.where = userSearch;
       }
     }
     req.dmsFilter = query;

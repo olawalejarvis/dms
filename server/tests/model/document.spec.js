@@ -11,7 +11,7 @@ describe('Document Model', () => {
   const emptyFields = ['title', 'content', 'access'];
 
   before((done) => {
-    db.Role.create(helper.testRoleR)
+    db.Role.create({ title: 'regular', id: 2 })
       .then(() => {
         db.User.create(helper.regularUser)
           .then((user) => {
