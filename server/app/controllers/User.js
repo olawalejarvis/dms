@@ -1,6 +1,6 @@
 import db from '../models/index';
 import Auth from '../middlewares/Auth';
-import dms from '../Helper';
+import Helper from '../Helper/Helper';
 
 const User = {
   /**
@@ -15,7 +15,7 @@ const User = {
       .create(req.userInput)
       .then((user) => {
         const token = Auth.getToken(user);
-        user = dms.userProfile(user);
+        user = Helper.userProfile(user);
         return res.status(201)
           .send({
             success: true,
@@ -28,7 +28,7 @@ const User = {
         res.status(400)
           .send({
             success: false,
-            errorArray: dms.errorArray(error)
+            errorArray: Helper.errorArray(error)
           }));
   },
 
@@ -46,7 +46,7 @@ const User = {
         if (user && user.validPassword(req.body.password)) {
           user.update({ active: true });
           const token = Auth.getToken(user);
-          user = dms.getUserProfile(user);
+          user = Helper.getUserProfile(user);
           return res.status(200)
             .send({
               success: true,
@@ -92,7 +92,7 @@ const User = {
     * @returns {void} no returns
     */
   getAll(req, res) {
-    req.dmsFilter.attributes = dms.getUserAttribute();
+    req.dmsFilter.attributes = Helper.getUserAttribute();
     db.User
       .findAndCountAll(req.dmsFilter)
       .then((users) => {
@@ -102,13 +102,13 @@ const User = {
             limit: req.dmsFilter.limit,
             offset: req.dmsFilter.offset
           };
-          const pagnation = dms.pagnation(condition);
+          const pagination = Helper.pagination(condition);
           res.status(200)
             .send({
               success: true,
               message: 'You have successfully retrived all users',
               users,
-              pagnation
+              pagination
             });
         }
       })
@@ -123,28 +123,12 @@ const User = {
     * @returns {void|Response} response object or void
     */
   getUser(req, res) {
-    db.User
-      .findOne({
-        where: { id: req.params.id },
-        attributes: dms.getUserAttribute()
-      })
-      .then((user) => {
-        if (user) {
-          return res
-            .status(200)
-            .send({
-              success: true,
-              message: 'You have successfully retrived this user',
-              user
-            });
-        }
-        res.status(404)
-          .send({
-            success: false,
-            message: 'This user does not exist'
-          });
-      })
-      .catch(err => res.status(500).send(err.errors));
+    return res.status(200)
+      .send({
+        success: true,
+        message: 'You have successfully retrived this user',
+        user: Helper.getUserProfile(req.getUser)
+      });
   },
 
   /**
@@ -158,7 +142,7 @@ const User = {
     const errorArray = [];
     req.userInstance.update(req.body)
       .then((updatedUser) => {
-        updatedUser = dms.getUserProfile(updatedUser);
+        updatedUser = Helper.getUserProfile(updatedUser);
         return res.status(200)
           .send({
             success: true,
@@ -215,9 +199,9 @@ const User = {
               message: 'This user does not exist'
             });
         }
-        userDocuments.user = dms.getUserProfile(user);
+        userDocuments.user = Helper.getUserProfile(user);
         req.dmsFilter.where.ownerId = req.params.id;
-        req.dmsFilter.attributes = dms.getDocAttribute();
+        req.dmsFilter.attributes = Helper.getDocAttribute();
         db.Document.findAndCountAll(req.dmsFilter)
           .then((docs) => {
             const condition = {
@@ -225,15 +209,14 @@ const User = {
               limit: req.dmsFilter.limit,
               offset: req.dmsFilter.offset
             };
-            const pagnation = dms.pagnation(condition);
+            const pagination = Helper.pagination(condition);
             userDocuments.documents = docs;
             return res.status(200)
               .send({
                 success: true,
-                message: `This user's documents
-                  was successfully retrieved`,
+                message: 'This user\'s documents was successfully retrieved',
                 userDocuments,
-                pagnation
+                pagination
               });
           })
           .catch(err => res.status(500).send(err.errors));
@@ -250,8 +233,8 @@ const User = {
   search(req, res) {
     const request = req.dmsFilter;
     let condition = {};
-    let pagnation;
-    request.attributes = dms.getUserAttribute();
+    let pagination;
+    request.attributes = Helper.getUserAttribute();
     db.User.findAndCountAll(request)
       .then((users) => {
         condition = {
@@ -259,13 +242,13 @@ const User = {
           limit: request.limit,
           offset: request.offset
         };
-        pagnation = dms.pagnation(condition);
+        pagination = Helper.pagination(condition);
         res.status(200)
           .send({
             success: true,
             message: 'Your search was successful',
             users,
-            pagnation
+            pagination
           });
       });
   }

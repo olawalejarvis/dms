@@ -1,6 +1,5 @@
 import db from '../models/index';
-import Auth from '../middlewares/Auth';
-import dms from '../Helper';
+import Helper from '../Helper/Helper';
 
 const Document = {
 
@@ -41,13 +40,13 @@ const Document = {
           limit: req.dmsFilter.limit,
           offset: req.dmsFilter.offset
         };
-        const pagnation = dms.pagnation(condition);
+        const pagination = Helper.pagination(condition);
         res.status(200)
           .send({
             success: true,
             message: 'You have successfully retrieved all documents',
             documents,
-            pagnation
+            pagination
           });
       })
       .catch(error => res.status(500).send(error.errors));
@@ -61,40 +60,12 @@ const Document = {
     * @returns {void|Response} response object or void
     */
   getDocument(req, res) {
-    db.Document
-      .findById(req.params.id)
-      .then((document) => {
-        if (!document) {
-          return res.status(404)
-            .send({
-              success: false,
-              message: 'This document cannot be found'
-            });
-        }
-        if (Auth.isPublic(document) || Auth.isOwnerDoc(document, req)
-          || Auth.isAdmin(req.tokenDecode.roleId)) {
-          return res.status(200)
-            .send({
-              success: true,
-              message: 'You have successfully retrived this document',
-              document
-            });
-        }
-        if (Auth.hasRoleAccess(document, req)) {
-          return res.status(200)
-            .send({
-              success: true,
-              message: 'You have successfully retrived this document',
-              document
-            });
-        }
-        res.status(401)
-          .send({
-            success: false,
-            message: 'You are not permitted to view this document'
-          });
-      })
-      .catch(error => res.status(500).send(error.errors));
+    return res.status(200)
+      .send({
+        success: true,
+        message: 'You have successfully retrived this document',
+        document: req.singleDocument
+      });
   },
 
   /**
@@ -149,13 +120,13 @@ const Document = {
           limit: req.dmsFilter.limit,
           offset: req.dmsFilter.offset
         };
-        const pagnation = dms.pagnation(condition);
+        const pagination = Helper.pagination(condition);
         res.status(200)
           .send({
             success: true,
             message: 'This search was successfull',
             documents,
-            pagnation
+            pagination
           });
       })
       .catch(error => res.status(500).send(error.errors));

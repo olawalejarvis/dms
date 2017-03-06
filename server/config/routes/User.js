@@ -23,7 +23,7 @@ userRouter.get('/search',
   User.search);
 
 userRouter.route('/:id')
-  .get(Auth.verifyToken, User.getUser)
+  .get(Auth.verifyToken, Auth.getSingleUser, User.getUser)
   .put(Auth.verifyToken, Auth.validateUserUpdate, User.update)
   .delete(Auth.verifyToken,
     Auth.hasAdminPermission,

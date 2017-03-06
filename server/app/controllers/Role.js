@@ -1,5 +1,5 @@
 import db from '../models/index';
-import dms from '../Helper';
+import Helper from '../Helper/Helper';
 
 const Role = {
 
@@ -25,7 +25,7 @@ const Role = {
         res.status(400)
           .send({
             success: false,
-            errorArray: dms.errorArray(error)
+            errorArray: Helper.errorArray(error)
           }));
   },
 
@@ -71,7 +71,7 @@ const Role = {
         res.status(400)
           .send({
             success: false,
-            errorArray: dms.errorArray(error)
+            errorArray: Helper.errorArray(error)
           }));
   },
 

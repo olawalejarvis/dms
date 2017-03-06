@@ -1,5 +1,5 @@
 
-const dms = {
+const Helper = {
 
   /**
    * Get user's profile'
@@ -33,11 +33,11 @@ const dms = {
     ];
   },
   /**
-   * Pagnation
-   * @param {Object} condition pagnation conditiom
+   * Pagination
+   * @param {Object} condition pagination condition
    * @returns {Object} return an object
    */
-  pagnation(condition) {
+  pagination(condition) {
     const next = Math.ceil(condition.count / condition.limit);
     const currentPage = Math.floor((condition.offset / condition.limit) + 1);
     return {
@@ -75,6 +75,11 @@ const dms = {
       'updatedAt'
     ];
   },
+  /**
+   * Get errors
+   * @param {Array} error client side errors
+   * @returns {Array} return user's attributes
+   */
   errorArray(error) {
     const errorArray = [];
     error.errors.forEach((err) => {
@@ -85,4 +90,4 @@ const dms = {
 
 };
 
-export default dms;
+export default Helper;

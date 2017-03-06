@@ -19,6 +19,7 @@ docRouter.get('/search',
 
 docRouter.route('/:id')
   .get(Auth.verifyToken,
+    Auth.getSingleDocument,
     Document.getDocument)
   .put(Auth.verifyToken,
     Auth.hasDocumentPermission,

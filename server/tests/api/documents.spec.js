@@ -421,16 +421,16 @@ describe('DOCUMENT API', () => {
         });
     });
 
-    it('should return all documents with pagnation', (done) => {
+    it('should return all documents with pagination', (done) => {
       superRequest.get('/documents?limit=4&offset=3')
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body.documents.count).to.be.greaterThan(0);
-          expect(res.body.pagnation.page_count).to.equal(2);
-          expect(res.body.pagnation.Page).to.equal(1);
-          expect(res.body.pagnation.page_size).to.equal('4');
-          expect(res.body.pagnation.total_count).to.equal(7);
+          expect(res.body.pagination.page_count).to.equal(2);
+          expect(res.body.pagination.Page).to.equal(1);
+          expect(res.body.pagination.page_size).to.equal('4');
+          expect(res.body.pagination.total_count).to.equal(7);
           done();
         });
     });
@@ -518,17 +518,17 @@ describe('DOCUMENT API', () => {
         });
     });
 
-    it('should return all documents with pagnation', (done) => {
+    it('should return all documents with pagination', (done) => {
       superRequest.get(`/documents/search?query=
       ${publicD.content.substr(2, 6)} ${publicD.title.substr(1, 6)}`)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body.documents.count).to.be.greaterThan(0);
-          expect(res.body.pagnation.page_count).to.be.greaterThan(0);
-          expect(res.body.pagnation.Page).to.be.greaterThan(0);
-          expect(res.body.pagnation.page_size).to.greaterThan(0);
-          expect(res.body.pagnation.total_count).to.be.greaterThan(0);
+          expect(res.body.pagination.page_count).to.be.greaterThan(0);
+          expect(res.body.pagination.Page).to.be.greaterThan(0);
+          expect(res.body.pagination.page_size).to.greaterThan(0);
+          expect(res.body.pagination.total_count).to.be.greaterThan(0);
           done();
         });
     });

@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import db from '../models/index';
 
-const secretKey = process.env.SECRET || 'funmilayoomomowo';
+dotenv.config();
+
+const secretKey = process.env.SECRET;
 
 const Auth = {
 
@@ -312,6 +315,31 @@ const Auth = {
         next();
       });
   },
+ /**
+   * Get a single user's profile
+   * @param {Object} req req object
+   * @param {Object} res response object
+   * @param {Object} next Move to next controller handler
+   * @returns {void|Object} response object or void
+   */
+  getSingleUser(req, res, next) {
+    db.User
+      .findOne({
+        where: { id: req.params.id },
+      })
+      .then((user) => {
+        if (!user) {
+          return res.status(404)
+            .send({
+              success: false,
+              message: 'This user does not exist'
+            });
+        }
+        req.getUser = user;
+        next();
+      })
+      .catch(err => res.status(500).send(err.errors));
+  },
   /**
    * Validate user to delete, make sure it not admin user
    * @param {Object} req req object
@@ -501,6 +529,38 @@ const Auth = {
       ownerRoleId: req.tokenDecode.roleId
     };
     next();
+  },
+ /**
+   * Get a single user's document
+   * @param {Object} req req object
+   * @param {Object} res response object
+   * @param {Object} next Move to next controller handler
+   * @returns {void|Object} response object or void
+   */
+  getSingleDocument(req, res, next) {
+    db.Document
+      .findById(req.params.id)
+      .then((document) => {
+        if (!document) {
+          return res.status(404)
+            .send({
+              success: false,
+              message: 'This document cannot be found'
+            });
+        }
+        if (!Auth.isPublic(document) && !Auth.isOwnerDoc(document, req)
+           && !Auth.isAdmin(req.tokenDecode.roleId)
+           && Auth.hasRoleAccess(document, req)) {
+          res.status(401)
+            .send({
+              success: false,
+              message: 'You are not permitted to view this document'
+            });
+        }
+        req.singleDocument = document;
+        next();
+      })
+      .catch(error => res.status(500).send(error.errors));
   },
  /**
    * Check for document edit and delete permission

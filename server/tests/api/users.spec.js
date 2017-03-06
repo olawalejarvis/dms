@@ -412,17 +412,17 @@ describe('User API', () => {
           });
       });
 
-      it('should return search result with pagnation', (done) => {
+      it('should return search result with pagination', (done) => {
         superRequest.get(`/users/search?query=
         ${arrayUsers[0].firstname.substr(1, 6)} 
         ${arrayUsers[2].firstname.substr(1, 6)}`)
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.body.message).to.equal('Your search was successful');
-            expect(res.body.pagnation).to.have.property('page_count');
-            expect(res.body.pagnation).to.have.property('Page');
-            expect(res.body.pagnation).to.have.property('page_size');
-            expect(res.body.pagnation).to.have.property('total_count');
+            expect(res.body.pagination).to.have.property('page_count');
+            expect(res.body.pagination).to.have.property('Page');
+            expect(res.body.pagination).to.have.property('page_size');
+            expect(res.body.pagination).to.have.property('total_count');
             done();
           });
       });
