@@ -427,10 +427,10 @@ const Auth = {
       }
       query.where = {
         $or: [
-          { username: { $ilike: { $any: terms } } },
-          { firstname: { $ilike: { $any: terms } } },
-          { lastname: { $ilike: { $any: terms } } },
-          { email: { $ilike: { $any: terms } } }
+          { username: { $iLike: { $any: terms } } },
+          { firstname: { $iLike: { $any: terms } } },
+          { lastname: { $iLike: { $any: terms } } },
+          { email: { $iLike: { $any: terms } } }
         ]
       };
     }
@@ -550,8 +550,8 @@ const Auth = {
         }
         if (!Auth.isPublic(document) && !Auth.isOwnerDoc(document, req)
            && !Auth.isAdmin(req.tokenDecode.roleId)
-           && Auth.hasRoleAccess(document, req)) {
-          res.status(401)
+           && !Auth.hasRoleAccess(document, req)) {
+          return res.status(401)
             .send({
               success: false,
               message: 'You are not permitted to view this document'
@@ -649,8 +649,8 @@ const Auth = {
     const like = {
       $or:
       [
-        { title: { $ilike: { $any: terms } } },
-        { content: { $ilike: { $any: terms } } }
+        { title: { $iLike: { $any: terms } } },
+        { content: { $iLike: { $any: terms } } }
       ]
     };
     return like;
