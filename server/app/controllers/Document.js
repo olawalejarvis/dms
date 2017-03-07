@@ -14,6 +14,7 @@ const Document = {
     db.Document
       .create(req.docInput)
        .then((document) => {
+         document = Helper.getDocument(document);
          res.status(201)
           .send({
             success: true,
@@ -32,6 +33,7 @@ const Document = {
     * @returns {void} response object or void
     */
   getAll(req, res) {
+    req.dmsFilter.attributes = Helper.getDocAttribute();
     db.Document
       .findAndCountAll(req.dmsFilter)
       .then((documents) => {
@@ -59,11 +61,12 @@ const Document = {
     * @returns {void|Response} response object or void
     */
   getDocument(req, res) {
+    const document = Helper.getDocument(req.singleDocument);
     return res.status(200)
       .send({
         success: true,
         message: 'You have successfully retrived this document',
-        document: req.singleDocument
+        document
       });
   },
 
@@ -110,6 +113,7 @@ const Document = {
     * @returns {void|Response} response object or void
     */
   search(req, res) {
+    req.dmsFilter.attributes = Helper.getDocAttribute();
     db.Document
       .findAndCountAll(req.dmsFilter)
       .then((documents) => {

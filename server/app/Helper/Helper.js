@@ -64,7 +64,7 @@ const Helper = {
     };
   },
   /**
-   * Get user's attributes'
+   * Get document's attributes'
    * @returns {Array} return user's attributes
    */
   getDocAttribute() {
@@ -73,6 +73,7 @@ const Helper = {
       'title',
       'content',
       'access',
+      'ownerId',
       'createdAt',
       'updatedAt'
     ];
@@ -88,6 +89,22 @@ const Helper = {
       errorArray.push({ path: err.path, message: err.message });
     });
     return errorArray;
+  },
+  /**
+   * @param {Object} data document response from the database
+   * Get documents's attributes'
+   * @returns {Object} return user's attributes
+   */
+  getDocument(data) {
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      access: data.access,
+      ownerId: data.ownerId,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt
+    };
   },
 
 };
