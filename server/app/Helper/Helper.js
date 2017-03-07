@@ -1,4 +1,6 @@
-
+/**
+  * Controller's' helper
+  */
 const Helper = {
 
   /**

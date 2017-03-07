@@ -48,8 +48,7 @@ const Document = {
             documents,
             pagination
           });
-      })
-      .catch(error => res.status(500).send(error.errors));
+      });
   },
 
   /**
@@ -100,8 +99,7 @@ const Document = {
            success: true,
            message: 'This document has been deleted successfully'
          })
-      )
-      .catch(error => res.status(500).send(error.errors));
+      );
   },
 
   /**
@@ -128,8 +126,7 @@ const Document = {
             documents,
             pagination
           });
-      })
-      .catch(error => res.status(500).send(error.errors));
+      });
   }
 
 };

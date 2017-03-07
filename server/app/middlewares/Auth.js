@@ -212,7 +212,7 @@ const Auth = {
           return res.status(409)
             .send({
               success: false,
-              message: 'email already exist'
+              message: 'email already exists'
             });
         }
         db.User.findOne({ where: { username: req.body.username } })
@@ -221,7 +221,7 @@ const Auth = {
               return res.status(409)
                 .send({
                   success: false,
-                  message: 'username already exist'
+                  message: 'username already exists'
                 });
             }
             username = req.body.username;

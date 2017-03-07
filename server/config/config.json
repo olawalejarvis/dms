@@ -1,17 +1,11 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "postgres",
-    "database": "dms",
-    "host": "127.0.0.1",
+    "use_env_variable": "DATABASE_DEV_URL",
     "dialect": "postgres",
     "logging": false
   },
   "test": {
-    "username": "postgres",
-    "password": "postgres",
-    "database": "dms_test",
-    "host": "127.0.0.1",
+    "use_env_variable": "DATABASE_TEST_URL",
     "dialect": "postgres",
     "logging": false
   },

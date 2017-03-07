@@ -60,8 +60,7 @@ const User = {
             success: false,
             message: 'Please enter a valid email or password to log in'
           });
-      })
-      .catch(err => res.status(500).send(err.errors));
+      });
   },
 
   /**
@@ -111,8 +110,7 @@ const User = {
               pagination
             });
         }
-      })
-      .catch(err => res.status(500).send(err.errors));
+      });
   },
 
   /**
@@ -218,10 +216,8 @@ const User = {
                 userDocuments,
                 pagination
               });
-          })
-          .catch(err => res.status(500).send(err.errors));
-      })
-      .catch(err => res.status(500).send(err.errors));
+          });
+      });
   },
   /**
     * Search users

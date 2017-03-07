@@ -46,8 +46,7 @@ const Role = {
           message: 'You have successfully retrived all roles',
           roles
         });
-      })
-      .catch(err => res.status(500).send(err.errors));
+      });
   },
 
   /**
@@ -90,8 +89,7 @@ const Role = {
             success: true,
             message: 'This role has been deleted'
           });
-      })
-      .catch(err => res.status(500).send(err.errors));
+      });
   },
 
   /**
@@ -118,8 +116,7 @@ const Role = {
            message: 'This role has been retrieved successfully',
            role
          });
-      })
-      .catch(err => res.status(500).send(err.errors));
+      });
   }
 };
 
