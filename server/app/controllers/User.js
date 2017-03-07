@@ -101,6 +101,7 @@ const User = {
             limit: req.dmsFilter.limit,
             offset: req.dmsFilter.offset
           };
+          delete users.count;
           const pagination = Helper.pagination(condition);
           res.status(200)
             .send({
@@ -207,6 +208,7 @@ const User = {
               limit: req.dmsFilter.limit,
               offset: req.dmsFilter.offset
             };
+            delete docs.count;
             const pagination = Helper.pagination(condition);
             userDocuments.documents = docs;
             return res.status(200)
@@ -238,6 +240,7 @@ const User = {
           limit: request.limit,
           offset: request.offset
         };
+        delete users.count;
         pagination = Helper.pagination(condition);
         res.status(200)
           .send({

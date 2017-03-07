@@ -42,6 +42,7 @@ const Document = {
           limit: req.dmsFilter.limit,
           offset: req.dmsFilter.offset
         };
+        delete documents.count;
         const pagination = Helper.pagination(condition);
         res.status(200)
           .send({
@@ -122,6 +123,7 @@ const Document = {
           limit: req.dmsFilter.limit,
           offset: req.dmsFilter.offset
         };
+        delete documents.count;
         const pagination = Helper.pagination(condition);
         res.status(200)
           .send({

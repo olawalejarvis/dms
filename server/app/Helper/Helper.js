@@ -44,7 +44,7 @@ const Helper = {
     const currentPage = Math.floor((condition.offset / condition.limit) + 1);
     return {
       page_count: next,
-      Page: currentPage,
+      page: currentPage,
       page_size: condition.limit,
       total_count: condition.count
     };

@@ -204,7 +204,6 @@ describe('User API', () => {
             expect(res.status).to.equal(200);
             expect(res.body.message).to
               .equal('You have successfully retrived all users');
-            expect(res.body.users.count).to.equal(1);
             expect(res.body.users.rows[0].username).to
               .equal(helper.regularUser.username);
             done();
@@ -219,7 +218,6 @@ describe('User API', () => {
             expect(res.status).to.equal(200);
             expect(res.body.message).to
               .equal('You have successfully retrived all users');
-            expect(res.body.users.count).to.equal(2);
             expect(res.body.success).to.equal(true);
             done();
           });
@@ -420,7 +418,7 @@ describe('User API', () => {
           .end((err, res) => {
             expect(res.body.message).to.equal('Your search was successful');
             expect(res.body.pagination).to.have.property('page_count');
-            expect(res.body.pagination).to.have.property('Page');
+            expect(res.body.pagination).to.have.property('page');
             expect(res.body.pagination).to.have.property('page_size');
             expect(res.body.pagination).to.have.property('total_count');
             done();
