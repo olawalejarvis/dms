@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import db from '../models/index';
+import Helper from '../Helper/Helper';
 
 dotenv.config();
 
@@ -77,70 +78,6 @@ const Auth = {
             });
         }
       });
-  },
-  /**
-   * Check for admin permission
-   * @param {String} roleId user role id
-   * @returns {Boolean} true or false
-   */
-  isAdmin(roleId) {
-    return roleId === 1;
-  },
-  /**
-   * Check for regular permission
-   * @param {String} roleId user role id
-   * @returns {Boolean} true or false
-   */
-  isRegular(roleId) {
-    return roleId === 2;
-  },
-  /**
-   * Check for owner
-   * @param {Object} req request object
-   * @returns {Boolean} true or false
-   */
-  isOwner(req) {
-    return String(req.tokenDecode.userId) === String(req.params.id);
-  },
-  /**
-   * Check if document's access level is public
-   * @param {Object} doc object
-   * @returns {Boolean} true or false
-   */
-  isPublic(doc) {
-    return doc.access === 'public';
-  },
-  /**
-   * Check for document's owner
-   * @param {Object} doc object
-   * @param {Object} req request object
-   * @returns {Boolean} true or false
-   */
-  isOwnerDoc(doc, req) {
-    return doc.ownerId === req.tokenDecode.userId;
-  },
-  /**
-   * Check for document's role permission
-   * @param {Object} doc object
-   * @param {Object} req request object
-   * @returns {Boolean} true or false
-   */
-  hasRoleAccess(doc, req) {
-    return (doc.access === 'role'
-      && doc.ownerRoleId === req.tokenDecode.roleId);
-  },
-  /**
-   * Get token
-   * @param {Object} user user's object
-   * @returns {Boolean} true or false
-   */
-  getToken(user) {
-    const userToken = jwt.sign({
-      userId: user.id
-    },
-      secretKey, { expiresIn: '7d' }
-    );
-    return userToken;
   },
   /**
    * Validate user's input
@@ -279,7 +216,7 @@ const Auth = {
           message: 'You are not permitted to modify the default admin user'
         });
     }
-    if (!(Auth.isAdmin(req.tokenDecode.roleId) || Auth.isOwner(req))) {
+    if (!(Helper.isAdmin(req.tokenDecode.roleId) || Helper.isOwner(req))) {
       return res.status(401)
         .send({
           success: false,
@@ -287,7 +224,7 @@ const Auth = {
         });
     }
     if (!!req.body.roleId && req.body.roleId === '1') {
-      if (!Auth.isAdmin(req.tokenDecode.roleId)) {
+      if (!Helper.isAdmin(req.tokenDecode.roleId)) {
         return res.status(403)
           .send({
             success: false,
@@ -358,14 +295,14 @@ const Auth = {
               message: 'This user does not exist'
             });
         }
-        if (Auth.isAdmin(user.roleId) && user.id === 1) {
+        if (Helper.isAdmin(user.roleId) && user.id === 1) {
           return res.status(403)
             .send({
               success: false,
               message: 'You can not delete the default admin user'
             });
         }
-        if (Auth.isRegular(user.roleId) && user.id === 2) {
+        if (Helper.isRegular(user.roleId) && user.id === 2) {
           return res.status(403)
             .send({ message: 'You can not delete the default regular user' });
         }
@@ -435,7 +372,7 @@ const Auth = {
       };
     }
     if (`${req.baseUrl}${req.route.path}` === '/users/') {
-      query.where = Auth.isAdmin(req.tokenDecode.roleId)
+      query.where = Helper.isAdmin(req.tokenDecode.roleId)
         ? {}
         : { id: req.tokenDecode.userId };
     }
@@ -447,26 +384,27 @@ const Auth = {
             message: 'Please enter a search query'
           });
       }
-      if (Auth.isAdmin(req.tokenDecode.roleId)) {
-        query.where = Auth.likeSearch(terms);
+      if (Helper.isAdmin(req.tokenDecode.roleId)) {
+        query.where = Helper.likeSearch(terms);
       } else {
         query.where = {
-          $and: [Auth.docAccess(req), Auth.likeSearch(terms)]
+          $and: [Helper.docAccess(req), Helper.likeSearch(terms)]
         };
       }
     }
     if (`${req.baseUrl}${req.route.path}` === '/documents/') {
-      if (Auth.isAdmin(req.tokenDecode.roleId)) {
+      if (Helper.isAdmin(req.tokenDecode.roleId)) {
         query.where = {};
       } else {
-        query.where = Auth.docAccess(req);
+        query.where = Helper.docAccess(req);
       }
     }
     if (`${req.baseUrl}${req.route.path}` === '/users/:id/documents') {
-      const adminSearch = req.query.query ? Auth.likeSearch(terms) : { };
+      const adminSearch = req.query.query ? Helper.likeSearch(terms) : { };
       const userSearch = req.query.query
-        ? [Auth.docAccess(req), Auth.likeSearch(terms)] : Auth.docAccess(req);
-      if (Auth.isAdmin(req.tokenDecode.roleId)) {
+        ? [Helper.docAccess(req), Helper.likeSearch(terms)]
+        : Helper.docAccess(req);
+      if (Helper.isAdmin(req.tokenDecode.roleId)) {
         query.where = adminSearch;
       } else {
         query.where = userSearch;
@@ -548,9 +486,9 @@ const Auth = {
               message: 'This document cannot be found'
             });
         }
-        if (!Auth.isPublic(document) && !Auth.isOwnerDoc(document, req)
-           && !Auth.isAdmin(req.tokenDecode.roleId)
-           && !Auth.hasRoleAccess(document, req)) {
+        if (!Helper.isPublic(document) && !Helper.isOwnerDoc(document, req)
+           && !Helper.isAdmin(req.tokenDecode.roleId)
+           && !Helper.hasRoleAccess(document, req)) {
           return res.status(401)
             .send({
               success: false,
@@ -579,8 +517,8 @@ const Auth = {
               message: 'This document does not exist'
             });
         }
-        if (!Auth.isOwnerDoc(doc, req)
-          && !Auth.isAdmin(req.tokenDecode.roleId)) {
+        if (!Helper.isOwnerDoc(doc, req)
+          && !Helper.isAdmin(req.tokenDecode.roleId)) {
           return res.status(401)
             .send({
               success: false,
@@ -608,7 +546,7 @@ const Auth = {
               message: 'This role does not exist'
             });
         }
-        if (Auth.isAdmin(role.id) || Auth.isRegular(role.id)) {
+        if (Helper.isAdmin(role.id) || Helper.isRegular(role.id)) {
           return res.status(403)
             .send({
               success: false,
@@ -620,40 +558,17 @@ const Auth = {
       });
   },
   /**
-   * Query for document's access
-   * @param {Object} req request object
-   * @returns {Object} return access query
+   * Get token
+   * @param {Object} user user's object
+   * @returns {Boolean} true or false
    */
-  docAccess(req) {
-    const access = {
-      $or:
-      [
-        { access: 'public' },
-        { ownerId: req.tokenDecode.userId },
-        {
-          $and: [
-            { access: 'role' },
-            { ownerRoleId: req.tokenDecode.roleId }
-          ]
-        }
-      ]
-    };
-    return access;
-  },
-  /**
-   * Query for search terms
-   * @param {Array} terms array of search terms
-   * @returns {Object} return user's data
-   */
-  likeSearch(terms) {
-    const like = {
-      $or:
-      [
-        { title: { $iLike: { $any: terms } } },
-        { content: { $iLike: { $any: terms } } }
-      ]
-    };
-    return like;
+  getToken(user) {
+    const userToken = jwt.sign({
+      userId: user.id
+    },
+      secretKey, { expiresIn: '7d' }
+    );
+    return userToken;
   },
 };
 
