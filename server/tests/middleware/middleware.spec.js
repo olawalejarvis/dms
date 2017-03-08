@@ -59,12 +59,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
         url: '/users',
         headers: { 'x-access-token': adminToken }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.verifyToken(request, response, stub.next);
-      expect(stub.next).to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.verifyToken(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).to.have.been.called;
       done();
     });
 
@@ -75,11 +75,11 @@ describe('MIDDLEWARE UNIT TEST', () => {
         url: '/users',
         headers: { 'x-access-token': 'hhehagagagg' }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.verifyToken(request, response, stub.next);
+      sinon.spy(middlewareStub, 'callback');
+      Auth.verifyToken(request, response, middlewareStub.callback);
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('The token you supplied has expired');
@@ -97,11 +97,11 @@ describe('MIDDLEWARE UNIT TEST', () => {
         headers: { 'x-access-token': regularToken },
         tokenDecode: { roleId: regularUser.roleId }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.hasAdminPermission(request, response, stub.next);
+      sinon.spy(middlewareStub, 'callback');
+      Auth.hasAdminPermission(request, response, middlewareStub.callback);
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('You are not permitted to perform this action');
@@ -117,12 +117,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
         headers: { 'x-access-token': adminToken },
         tokenDecode: { roleId: helper.adminUser.roleId }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.hasAdminPermission(request, response, stub.next);
-      expect(stub.next).to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.hasAdminPermission(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).to.have.been.called;
       done();
     });
   });
@@ -137,14 +137,14 @@ describe('MIDDLEWARE UNIT TEST', () => {
           firstname: 'andela',
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to.equal('Enter a valid email');
       });
-      Auth.validateUserInput(request, response, stub.next);
+      Auth.validateUserInput(request, response, middlewareStub.callback);
     });
 
     it('should continue when all the fields are complete', (done) => {
@@ -160,12 +160,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
           password: 'password'
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.validateUserInput(request, response, stub.next);
-      expect(stub.next).to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.validateUserInput(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).to.have.been.called;
       done();
     });
   });
@@ -181,12 +181,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
           password: helper.adminUser.password
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.validateLoginInput(request, response, stub.next);
-      expect(stub.next).to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.validateLoginInput(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).to.have.been.called;
       done();
     });
 
@@ -199,15 +199,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
           email: 'kk@mail.com',
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('Please provide your email and password to login');
       });
-      Auth.validateLoginInput(request, response, stub.next);
+      Auth.validateLoginInput(request, response, middlewareStub.callback);
     });
   });
 
@@ -224,15 +224,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
           email: 'new@mail.com',
         },
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('You are not permitted to modify the default admin user');
       });
-      Auth.validateUserUpdate(request, response, stub.next);
+      Auth.validateUserUpdate(request, response, middlewareStub.callback);
     });
 
     it('should continue when user is the owner', (done) => {
@@ -249,12 +249,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { roleId: regularUser.roleId }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.validateUserUpdate(request, response, stub.next);
-      expect(stub.next).not.to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.validateUserUpdate(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).not.to.have.been.called;
       done();
     });
   });
@@ -269,14 +269,14 @@ describe('MIDDLEWARE UNIT TEST', () => {
           id: 66
         },
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData()).to.equal('This user does not exist');
       });
-      Auth.getSingleUser(request, response, stub.next);
+      Auth.getSingleUser(request, response, middlewareStub.callback);
     });
 
     it('should continue when user exist', (done) => {
@@ -288,12 +288,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
           id: regularUser.id
         },
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.getSingleUser(request, response, stub.next);
-      expect(stub.next).not.to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.getSingleUser(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).not.to.have.been.called;
       done();
     });
   });
@@ -308,15 +308,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
           limit: -2,
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData()
           .message).to.equal('Only positive number is allowed for limit value');
       });
-      Auth.validateSearch(request, response, stub.next);
+      Auth.validateSearch(request, response, middlewareStub.callback);
     });
 
     it('should not continue when offset is negative', () => {
@@ -328,15 +328,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
           offset: -2,
         }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('Only positive number is allowed for offset value');
       });
-      Auth.validateSearch(request, response, stub.next);
+      Auth.validateSearch(request, response, middlewareStub.callback);
     });
   });
 
@@ -351,14 +351,14 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to.equal('Title field is required');
       });
-      Auth.validateDocumentsInput(request, response, stub.next);
+      Auth.validateDocumentsInput(request, response, middlewareStub.callback);
     });
 
     it('should not continue when access level is andela', () => {
@@ -373,15 +373,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('Access type can only be public, private or role');
       });
-      Auth.validateDocumentsInput(request, response, stub.next);
+      Auth.validateDocumentsInput(request, response, middlewareStub.callback);
     });
   });
 
@@ -409,15 +409,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         params: { id: 7 },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('This document cannot be found');
       });
-      Auth.getSingleDocument(request, response, stub.next);
+      Auth.getSingleDocument(request, response, middlewareStub.callback);
     });
 
     it('should not continue when document is private', () => {
@@ -428,15 +428,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         params: { id: privateDocument.id },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('You are not permitted to view this document');
       });
-      Auth.getSingleDocument(request, response, stub.next);
+      Auth.getSingleDocument(request, response, middlewareStub.callback);
     });
 
     it('should continue when document is public', (done) => {
@@ -447,12 +447,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
         params: { id: publicDocument.id },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.getSingleDocument(request, response, stub.next);
-      expect(stub.next).not.to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.getSingleDocument(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).not.to.have.been.called;
       done();
     });
   });
@@ -471,15 +471,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 2, roleId: 2 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('This document does not exist');
       });
-      Auth.hasDocumentPermission(request, response, stub.next);
+      Auth.hasDocumentPermission(request, response, middlewareStub);
     });
 
     it('should continue when user is the owner of the document', (done) => {
@@ -492,12 +492,12 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 1, roleId: 1 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
-      Auth.hasDocumentPermission(request, response, stub.next);
-      expect(stub.next).not.to.have.been.called;
+      sinon.spy(middlewareStub, 'callback');
+      Auth.hasDocumentPermission(request, response, middlewareStub.callback);
+      expect(middlewareStub.callback).not.to.have.been.called;
       done();
     });
   });
@@ -514,15 +514,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 1, roleId: 1 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('You are not permitted to modify this role');
       });
-      Auth.modifyRolePermission(request, response, stub.next);
+      Auth.modifyRolePermission(request, response, middlewareStub.callback);
     });
 
     it('should not continue when admin want to delete the default regular role',
@@ -536,15 +536,15 @@ describe('MIDDLEWARE UNIT TEST', () => {
         },
         tokenDecode: { userId: 1, roleId: 1 }
       });
-      const stub = {
-        next: () => { }
+      const middlewareStub = {
+        callback: () => { }
       };
-      sinon.spy(stub, 'next');
+      sinon.spy(middlewareStub, 'callback');
       response.on('end', () => {
         expect(response._getData().message).to
           .equal('You are not permitted to modify this role');
       });
-      Auth.modifyRolePermission(request, response, stub.next);
+      Auth.modifyRolePermission(request, response, middlewareStub.callback);
       done();
     });
   });

@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/andela-oaladeusi/dms/badge.svg?branch=feedback)](https://coveralls.io/github/andela-oaladeusi/dms?branch=feedback) [![Build Status](https://travis-ci.org/andela-oaladeusi/dms.svg?branch=feedback)](https://travis-ci.org/andela-oaladeusi/dms) [![Code Climate](https://codeclimate.com/repos/58ac1f917dc061005e007268/badges/aa2cf7e31c3bdcb34278/gpa.svg)](https://codeclimate.com/repos/58ac1f917dc061005e007268/feed)
+[![Coverage Status](https://coveralls.io/repos/github/andela-oaladeusi/dms/badge.svg?branch=feature/138980981/user-route-controller)](https://coveralls.io/github/andela-oaladeusi/dms?branch=feature/138980981/user-route-controller) [![Build Status](https://travis-ci.org/andela-oaladeusi/dms.svg?branch=feedback)](https://travis-ci.org/andela-oaladeusi/dms) [![Code Climate](https://codeclimate.com/repos/58ac1f917dc061005e007268/badges/aa2cf7e31c3bdcb34278/gpa.svg)](https://codeclimate.com/repos/58ac1f917dc061005e007268/feed)
 
 # Document Management System
 The Document management system provides REST API enpoints for a document management system. It allows create, retrieve, update and delete actions to be carried out.
@@ -8,16 +8,7 @@ It also ensures that users are authorized.
 - Use Postman collection
   [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2)
 
-## Installation
-- Install [NodeJs](https://nodejs.org/en/) and [Postgres](https://www.postgresql.org/) on your machine
-- Clone the repository `$ git clone https://github.com/andela-oaladeusi/dms.git`
-- Change into the directory `$ cd /dms`
-- Install all required dependencies with `$ npm install`
-- Create a `.env` file in your root directory as described in `.env.sample` file
-- Start the app with `npm start`
-- Run Test `npm test`
-
-# API Documentation
+# API URES
 The API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate API status and errors.
 
 **Users**:
@@ -61,6 +52,15 @@ Only an admin user can create and manage role(s)
 Users are authenticated and validated using JSON web token (JWT).
 By generating a token on registration and login, API endpoints and documents are protected from unauthorised access.
 Requests to protected routes are validated using the generated token.
+
+## Installation
+- Install [NodeJs](https://nodejs.org/en/) and [Postgres](https://www.postgresql.org/) on your machine
+- Clone the repository `$ git clone https://github.com/andela-oaladeusi/dms.git`
+- Change into the directory `$ cd /dms`
+- Install all required dependencies with `$ npm install`
+- Create a `.env` file in your root directory as described in `.env.sample` file
+- Start the app with `npm start`
+- Run Test `npm test`
 
 ## Endpoints
 
@@ -712,7 +712,7 @@ Document Management System API is built with the following technologies;
 The limitations of the API are:
 - Users cannot delete themselves using the API
 - Documents are not unique (A user can create a document with the same title)
-- User can only logs in on one system
-   
+- User cannot login on two different platform
+
 ## LICENSE
  © [Olawalequest](https://github.com/andela-oaladeusi)
