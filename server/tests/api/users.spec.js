@@ -58,7 +58,6 @@ describe('User API', () => {
             .send(uniqueUser)
             .end((err, res) => {
               expect(res.status).to.equal(409);
-              expect(res.body.success).to.equal(false);
               expect(res.body.message).to
                 .equal(`${field} already exists`);
               done();
@@ -74,7 +73,6 @@ describe('User API', () => {
             .send(invalidUser)
             .end((err, res) => {
               expect(res.status).to.equal(400);
-              expect(res.body.success).to.equal(false);
               expect(res.body.message).to
                 .equal(`Enter a valid ${field}`);
               done();
@@ -89,7 +87,6 @@ describe('User API', () => {
             expect(res.status).to.equal(400);
             expect(res.body.message)
               .to.equal('Minimum of 8 characters is allowed for password');
-            expect(res.body.success).to.equal(false);
             done();
           });
       });
@@ -102,7 +99,6 @@ describe('User API', () => {
             expect(res.status).to.equal(403);
             expect(res.body.message).to
               .equal('Permission denied, You cannot sign up as an admin user');
-            expect(res.body.success).to.equal(false);
             done();
           });
       });
@@ -164,7 +160,6 @@ describe('User API', () => {
         superRequest.post('/users/login')
           .send({ })
           .end((err, res) => {
-            expect(res.body.success).to.equal(false);
             expect(res.status).to.equal(400);
             expect(res.body.message).to
               .equal('Please provide your email and password to login');
@@ -218,7 +213,6 @@ describe('User API', () => {
             expect(res.status).to.equal(200);
             expect(res.body.message).to
               .equal('You have successfully retrived all users');
-            expect(res.body.success).to.equal(true);
             done();
           });
       });
@@ -285,7 +279,6 @@ describe('User API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(400);
-            expect(res.body.success).to.equal(false);
             expect(res.body.errorArray[0].message).to
               .equal('Input a valid username');
             done();
@@ -299,7 +292,6 @@ describe('User API', () => {
           .set({ 'x-access-token': regularToken })
           .end((err, res) => {
             expect(res.status).to.equal(400);
-            expect(res.body.success).to.equal(false);
             expect(res.body.errorArray[0].message)
               .to.equal('username already exist');
             done();

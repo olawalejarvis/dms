@@ -17,7 +17,6 @@ const Document = {
          document = Helper.getDocument(document);
          res.status(201)
           .send({
-            success: true,
             message: 'Your document has been successfully created',
             document
           });
@@ -46,7 +45,6 @@ const Document = {
         const pagination = Helper.pagination(condition);
         res.status(200)
           .send({
-            success: true,
             message: 'You have successfully retrieved all documents',
             documents,
             pagination
@@ -65,7 +63,6 @@ const Document = {
     const document = Helper.getDocument(req.singleDocument);
     return res.status(200)
       .send({
-        success: true,
         message: 'You have successfully retrived this document',
         document
       });
@@ -82,7 +79,6 @@ const Document = {
     req.docInstance.update(req.body)
       .then(updatedDocument => res.status(200)
         .send({
-          success: true,
           message: 'This document has been updated successfully',
           updatedDocument
         }))
@@ -100,7 +96,6 @@ const Document = {
     req.docInstance.destroy()
       .then(() => res.status(200)
          .send({
-           success: true,
            message: 'This document has been deleted successfully'
          })
       );
@@ -127,7 +122,6 @@ const Document = {
         const pagination = Helper.pagination(condition);
         res.status(200)
           .send({
-            success: true,
             message: 'This search was successfull',
             documents,
             pagination

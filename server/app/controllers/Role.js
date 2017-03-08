@@ -16,7 +16,6 @@ const Role = {
       .then((role) => {
         res.status(201)
           .send({
-            success: true,
             message: 'Role has been created',
             role
           });
@@ -24,7 +23,6 @@ const Role = {
       .catch(error =>
         res.status(400)
           .send({
-            success: false,
             errorArray: Helper.errorArray(error)
           }));
   },
@@ -42,7 +40,6 @@ const Role = {
       .then((roles) => {
         res.status(200)
         .send({
-          success: true,
           message: 'You have successfully retrived all roles',
           roles
         });
@@ -61,7 +58,6 @@ const Role = {
       .then((updatedRole) => {
         res.status(200)
           .send({
-            success: true,
             message: 'This role has been updated',
             updatedRole
           });
@@ -69,7 +65,6 @@ const Role = {
       .catch(error =>
         res.status(400)
           .send({
-            success: false,
             errorArray: Helper.errorArray(error)
           }));
   },
@@ -86,7 +81,6 @@ const Role = {
       .then(() => {
         res.status(200)
           .send({
-            success: true,
             message: 'This role has been deleted'
           });
       });
@@ -106,13 +100,11 @@ const Role = {
         if (!role) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This role does not exist'
             });
         }
         res.status(200)
          .send({
-           success: true,
            message: 'This role has been retrieved successfully',
            role
          });

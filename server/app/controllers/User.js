@@ -18,7 +18,6 @@ const User = {
         user = Helper.userProfile(user);
         return res.status(201)
           .send({
-            success: true,
             message: 'Your account has been created successfully',
             token,
             user
@@ -27,7 +26,6 @@ const User = {
       .catch(error =>
         res.status(400)
           .send({
-            success: false,
             errorArray: Helper.errorArray(error)
           }));
   },
@@ -49,7 +47,6 @@ const User = {
           user = Helper.getUserProfile(user);
           return res.status(200)
             .send({
-              success: true,
               message: 'You have successfully logged in',
               token,
               user
@@ -57,7 +54,6 @@ const User = {
         }
         res.status(401)
           .send({
-            success: false,
             message: 'Please enter a valid email or password to log in'
           });
       });
@@ -77,7 +73,6 @@ const User = {
           .then(() =>
             res.status(200)
               .send({
-                success: true,
                 message: 'You have successfully logged out'
               }));
       });
@@ -91,7 +86,6 @@ const User = {
     * @returns {void} no returns
     */
   getAll(req, res) {
-    req.dmsFilter.attributes = Helper.getUserAttribute();
     db.User
       .findAndCountAll(req.dmsFilter)
       .then((users) => {
@@ -105,7 +99,6 @@ const User = {
           const pagination = Helper.pagination(condition);
           res.status(200)
             .send({
-              success: true,
               message: 'You have successfully retrived all users',
               users,
               pagination
@@ -124,7 +117,6 @@ const User = {
   getUser(req, res) {
     return res.status(200)
       .send({
-        success: true,
         message: 'You have successfully retrived this user',
         user: Helper.getUserProfile(req.getUser)
       });
@@ -140,22 +132,18 @@ const User = {
   update(req, res) {
     const errorArray = [];
     req.userInstance.update(req.body)
-      .then((updatedUser) => {
-        updatedUser = Helper.getUserProfile(updatedUser);
-        return res.status(200)
+      .then(updatedUser =>
+        res.status(200)
           .send({
-            success: true,
             message: 'Your profile has been updated',
             updatedUser
-          });
-      })
+          }))
       .catch((err) => {
         err.errors.forEach((error) => {
           errorArray.push({ path: error.path, message: error.message });
         });
         return res.status(400)
           .send({
-            success: false,
             errorArray
           });
       });
@@ -173,7 +161,6 @@ const User = {
       .then(() => {
         res.status(200)
           .send({
-            success: true,
             message: 'This account has been successfully deleted'
           });
       })
@@ -194,7 +181,6 @@ const User = {
         if (!user) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This user does not exist'
             });
         }
@@ -213,7 +199,6 @@ const User = {
             userDocuments.documents = docs;
             return res.status(200)
               .send({
-                success: true,
                 message: 'This user\'s documents was successfully retrieved',
                 userDocuments,
                 pagination
@@ -244,7 +229,6 @@ const User = {
         pagination = Helper.pagination(condition);
         res.status(200)
           .send({
-            success: true,
             message: 'Your search was successful',
             users,
             pagination

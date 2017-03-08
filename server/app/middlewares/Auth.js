@@ -23,7 +23,6 @@ const Auth = {
         if (err) {
           return res.status(401)
             .send({
-              success: false,
               message: 'The token you supplied has expired'
             });
         }
@@ -32,14 +31,12 @@ const Auth = {
             if (!user) {
               return res.status(404)
                 .send({
-                  success: false,
                   message: 'Account not found, Sign Up or sign in to get access'
                 });
             }
             if (!user.active) {
               return res.status(401)
                 .send({
-                  success: false,
                   message: 'Please sign in to access your account'
                 });
             }
@@ -51,7 +48,6 @@ const Auth = {
     } else {
       res.status(400)
         .send({
-          success: false,
           message: 'Please sign in or register to get a token'
         });
     }
@@ -73,7 +69,6 @@ const Auth = {
         } else {
           return res.status(403)
             .send({
-              success: false,
               message: 'You are not permitted to perform this action'
             });
         }
@@ -90,7 +85,6 @@ const Auth = {
     if (req.body.roleId && req.body.roleId === 1) {
       return res.status(403)
         .send({
-          success: false,
           message: 'Permission denied, You cannot sign up as an admin user'
         });
     }
@@ -103,42 +97,36 @@ const Auth = {
     if (!username) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Enter a valid username'
         });
     }
     if (!firstname) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Enter a valid firstname'
         });
     }
     if (!lastname) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Enter a valid lastname'
         });
     }
     if (!email) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Enter a valid email'
         });
     }
     if (!password) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Enter a valid password'
         });
     }
     if (req.body.password && req.body.password.length < 8) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Minimum of 8 characters is allowed for password'
         });
     }
@@ -148,7 +136,6 @@ const Auth = {
         if (user) {
           return res.status(409)
             .send({
-              success: false,
               message: 'email already exists'
             });
         }
@@ -157,7 +144,6 @@ const Auth = {
             if (newUser) {
               return res.status(409)
                 .send({
-                  success: false,
                   message: 'username already exists'
                 });
             }
@@ -184,7 +170,6 @@ const Auth = {
     if (!req.body.password || !req.body.email) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Please provide your email and password to login'
         });
     }
@@ -195,7 +180,6 @@ const Auth = {
     if (!email || !password) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Please enter a valid email and password'
         });
     }
@@ -212,14 +196,12 @@ const Auth = {
     if (req.params.id === '1') {
       return res.status(403)
         .send({
-          success: false,
           message: 'You are not permitted to modify the default admin user'
         });
     }
     if (!(Helper.isAdmin(req.tokenDecode.roleId) || Helper.isOwner(req))) {
       return res.status(401)
         .send({
-          success: false,
           message: 'You are not permitted to update this profile'
         });
     }
@@ -227,7 +209,6 @@ const Auth = {
       if (!Helper.isAdmin(req.tokenDecode.roleId)) {
         return res.status(403)
           .send({
-            success: false,
             message: 'You are not permitted to update role to admin'
           });
       }
@@ -235,7 +216,6 @@ const Auth = {
     if (req.body.id) {
       return res.status(403)
         .send({
-          success: false,
           message: 'You are not permitted to update your id'
         });
     }
@@ -244,7 +224,6 @@ const Auth = {
         if (!user) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This user does not exist'
             });
         }
@@ -268,7 +247,6 @@ const Auth = {
         if (!user) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This user does not exist'
             });
         }
@@ -291,14 +269,12 @@ const Auth = {
         if (!user) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This user does not exist'
             });
         }
         if (Helper.isAdmin(user.roleId) && user.id === 1) {
           return res.status(403)
             .send({
-              success: false,
               message: 'You can not delete the default admin user'
             });
         }
@@ -333,14 +309,12 @@ const Auth = {
     if (limit < 0 || !/^([1-9]\d*|0)$/.test(limit)) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Only positive number is allowed for limit value'
         });
     }
     if (offset < 0 || !/^([1-9]\d*|0)$/.test(offset)) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Only positive number is allowed for offset value'
         });
     }
@@ -358,7 +332,6 @@ const Auth = {
       if (!req.query.query) {
         return res.status(400)
           .send({
-            success: false,
             message: 'Please enter a search query'
           });
       }
@@ -380,7 +353,6 @@ const Auth = {
       if (!req.query.query) {
         return res.status(400)
           .send({
-            success: false,
             message: 'Please enter a search query'
           });
       }
@@ -426,28 +398,24 @@ const Auth = {
     if (!req.body.title) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Title field is required'
         });
     }
     if (!req.body.content) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Content field is required'
         });
     }
     if (!title) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Please enter a valid title'
         });
     }
     if (!content) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Please enter a valid content'
         });
     }
@@ -455,7 +423,6 @@ const Auth = {
       && !['public', 'private', 'role'].includes(req.body.access)) {
       return res.status(400)
         .send({
-          success: false,
           message: 'Access type can only be public, private or role'
         });
     }
@@ -482,7 +449,6 @@ const Auth = {
         if (!document) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This document cannot be found'
             });
         }
@@ -491,7 +457,6 @@ const Auth = {
            && !Helper.hasRoleAccess(document, req)) {
           return res.status(401)
             .send({
-              success: false,
               message: 'You are not permitted to view this document'
             });
         }
@@ -513,7 +478,6 @@ const Auth = {
         if (!doc) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This document does not exist'
             });
         }
@@ -521,7 +485,6 @@ const Auth = {
           && !Helper.isAdmin(req.tokenDecode.roleId)) {
           return res.status(401)
             .send({
-              success: false,
               message: 'You are not permitted to modify this document'
             });
         }
@@ -542,14 +505,12 @@ const Auth = {
         if (!role) {
           return res.status(404)
             .send({
-              success: false,
               message: 'This role does not exist'
             });
         }
         if (Helper.isAdmin(role.id) || Helper.isRegular(role.id)) {
           return res.status(403)
             .send({
-              success: false,
               message: 'You are not permitted to modify this role'
             });
         }

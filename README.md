@@ -4,6 +4,64 @@
 The Document management system provides REST API enpoints for a document management system. It allows create, retrieve, update and delete actions to be carried out.
 It also ensures that users are authorized.
 
+## Usage
+- Use Postman collection
+  [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2)
+
+## Installation
+- Install [NodeJs](https://nodejs.org/en/) and [Postgres](https://www.postgresql.org/) on your machine
+- Clone the repository `$ git clone https://github.com/andela-oaladeusi/dms.git`
+- Change into the directory `$ cd /dms`
+- Install all required dependencies with `$ npm install`
+- Create a `.env` file in your root directory as described in `.env.sample` file
+- Start the app with `npm start`
+- Run Test `npm test`
+
+# API Documentation
+The API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate API status and errors.
+
+**Users**:
+A created user will have a role, either an admin or a regular.
+- A Regular User can:
+    - Create an account
+    - Edit his profile.
+    - Search users
+    - Create a document
+    - Edit a document
+    - Retrieve a document
+    - Delete a document
+    - Limit access to a document by specifying an access group `i.e. public, private or role`.
+    - View public documents created by other users.
+    - View documents created by his access group with access level set as `role`.
+    - Search documents.
+    - View `public` and `role` access level documents of other regular users.
+
+- An Admin User can:
+    - View all users
+    - View all created documents
+    - Delete any user
+    - Update any user's record
+    - Create a new role
+    - View all created roles
+    - Search for any user
+    - Search for any document
+
+**Documents**:
+Documents can be created and must have:
+- Published date
+- Title
+- Content
+- Access (`private, public or role`)
+
+**Roles**:
+Roles can also be created, the default roles are `admin` and `regular`
+Only an admin user can create and manage role(s)
+
+**Authentication**:
+Users are authenticated and validated using JSON web token (JWT).
+By generating a token on registration and login, API endpoints and documents are protected from unauthorised access.
+Requests to protected routes are validated using the generated token.
+
 ## Endpoints
 
 **Users**
@@ -41,49 +99,6 @@ GET | [/documents?query=new](#search-document) | Search documents using key term
 PUT | [/documents/:id](#edit-document) | Update a specific document
 DELETE | [/documents/:id](#delete-document) | Remove a specific document from storage
 
-# API Documentation
-The API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate API status and errors.
-
-**Users**:
-A created user will have a role, either an admin or a regular.
-- A Regular User can:
-    - Create an account
-    - Edit his profile.
-    - Search users
-    - Create a document
-    - Edit a document
-    - Retrieve a document
-    - Delete a document
-    - Limit access to a document by specifying an access group `i.e. public, private or role`.
-    - View public documents created by other users.
-    - View documents created by his access group with access level set as `role`.
-    - Search a users public documents.
-    - View `public` and `role` access level documents of other regular users.
-
-- An Admin User can:
-    - View all users
-    - View all created documents
-    - Delete any user
-    - Update any user's record
-    - Create a new role
-    - View all created roles
-    - Search for any user
-
-**Documents**:
-Documents can be created and must have:
-- Published date
-- Title
-- Content
-- Access (`private, public or role`)
-
-**Roles**:
-Roles can also be created, the default roles are `admin` and `regular`
-
-**Authentication**:
-Users are authenticated and validated using JSON web token (JWT).
-By generating a token on registration and login, API endpoints and documents are protected from unauthorised access.
-Requests to protected routes are validated using the generated token.
-
 The following are some sample request and response from the API.
 
 ## Roles
@@ -100,7 +115,6 @@ Endpoint for Roles resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully retrived all roles",
   "roles": [
     {
@@ -136,7 +150,6 @@ Endpoint for Roles resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "Role has been created",
   "role": {
     "id": 3,
@@ -164,7 +177,6 @@ Endpoint for Roles resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This role has been updated",
   "updatedRole": {
     "id": 3,
@@ -186,7 +198,6 @@ Endpoint for Roles resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This role has been retrieved successfully",
   "role": {
     "id": 3,
@@ -208,7 +219,6 @@ Endpoint for Roles resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This role has been deleted"
 }
 ```
@@ -228,7 +238,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully retrived all users",
   "users": {
     "rows": [
@@ -279,7 +288,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "Your account has been created successfully",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTQ4ODkwNTg3OCwiZXhwIjoxNDg5NTEwNjc4fQ.3cJlim3wV60kA2LjskSXm5633EcK56A3AayCLceEuLo",
   "user": {
@@ -312,7 +320,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully logged in",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTQ4ODkwOTA0OCwiZXhwIjoxNDg5NTEzODQ4fQ.YKsL2EfuLDmhHDySTQjWHA5qbkN77m76-DpLtFKFF-8",
   "user": {
@@ -336,7 +343,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully logged out"
 }
 ```
@@ -353,7 +359,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully retrived this user",
   "user": {
     "id": 4,
@@ -383,7 +388,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "Your profile has been updated",
   "updatedUser": {
     "id": 4,
@@ -406,7 +410,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This account has been successfully deleted"
 }
 ```
@@ -422,7 +425,6 @@ Endpoint for Users resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "Your search was successful",
   "users": {
     "rows": [
@@ -470,7 +472,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully retrieved all documents",
   "documents": {
     "rows": [
@@ -517,7 +518,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This search was successfull",
   "documents": {
     "rows": [
@@ -559,7 +559,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This user's documents was successfully retrieved",
   "userDocuments": {
     "user": {
@@ -610,7 +609,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "Your document has been successfully created",
   "document": {
     "id": 3,
@@ -635,7 +633,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "You have successfully retrived this document",
   "document": {
     "id": 3,
@@ -666,7 +663,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This document has been updated successfully",
   "updatedDocument": {
     "id": 3,
@@ -692,7 +688,6 @@ Endpoint for document resource.
 - Body `(application/json)`
 ```json
 {
-  "success": true,
   "message": "This document has been deleted successfully"
 }
 ```
@@ -705,17 +700,19 @@ Document Management System API is built with the following technologies;
 - [Postgresql](https://www.postgresql.org/)
 - [Sequelize ORM](http://docs.sequelizejs.com/en/v3/)
 
-## Installation
-- Install [NodeJs](https://nodejs.org/en/) and [Postgres](https://www.postgresql.org/) on your machine
-- Clone the repository `$ git clone https://github.com/andela-oaladeusi/dms.git`
-- Change into the directory `$ cd /dms`
-- Install all required dependencies with `$ npm install`
-- Create a `.env` file in your root directory as described in `.env.sample` file
+## Contributing
+- Fork this repository to your GitHub account
+- Clone the forked repository
+- Create your feature branch
+- Commit your changes
+- Push to the remote branch
+- Open a Pull Request
 
-## Testing
-- Run Test `npm test`
-
-## Usage
-- Start the app with `$ npm start`
-- Use Postman collection
-  [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/8d7dc3154fb4a75853f2)
+## Limitations
+The limitations of the API are:
+- Users cannot delete themselves using the API
+- Documents are not unique (A user can create a document with the same title)
+- User can only logs in on one system
+   
+## LICENSE
+ © [Olawalequest](https://github.com/andela-oaladeusi)

@@ -53,7 +53,6 @@ describe('ROLE API', () => {
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.success).to.equal(false);
           expect(res.body.errorArray[0].message).to.equal('role already exist');
           done();
         });
@@ -235,7 +234,6 @@ describe('ROLE API', () => {
           expect(re.status).to.equal(400);
           expect(re.body.errorArray[1].message).to
             .equal('This field cannot be empty');
-          expect(re.body.success).to.equal(false);
           done();
         });
     });

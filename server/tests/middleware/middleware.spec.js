@@ -81,7 +81,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       sinon.spy(stub, 'next');
       Auth.verifyToken(request, response, stub.next);
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('The token you supplied has expired');
         done();
       });
     });
@@ -102,7 +103,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       sinon.spy(stub, 'next');
       Auth.hasAdminPermission(request, response, stub.next);
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('You are not permitted to perform this action');
         done();
       });
     });
@@ -126,7 +128,7 @@ describe('MIDDLEWARE UNIT TEST', () => {
   });
 
   describe('validateUserInput', () => {
-    it('should not continue when username is null', () => {
+    it('should not continue when email is null', () => {
       const response = responseEvent();
       request = httpMocks.createRequest({
         method: 'POST',
@@ -140,7 +142,7 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to.equal('Enter a valid email');
       });
       Auth.validateUserInput(request, response, stub.next);
     });
@@ -202,7 +204,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('Please provide your email and password to login');
       });
       Auth.validateLoginInput(request, response, stub.next);
     });
@@ -226,7 +229,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('You are not permitted to modify the default admin user');
       });
       Auth.validateUserUpdate(request, response, stub.next);
     });
@@ -270,7 +274,7 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData()).to.equal('This user does not exist');
       });
       Auth.getSingleUser(request, response, stub.next);
     });
@@ -294,28 +298,6 @@ describe('MIDDLEWARE UNIT TEST', () => {
     });
   });
 
-  describe('validateDeleteUser', () => {
-    it('should not continue when user want to delete the default admin user',
-    () => {
-      const response = responseEvent();
-      request = httpMocks.createRequest({
-        method: 'DELETE',
-        url: '/users/1',
-        params: {
-          id: 1
-        },
-      });
-      const stub = {
-        next: () => { }
-      };
-      sinon.spy(stub, 'next');
-      response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
-      });
-      Auth.validateDeleteUser(request, response, stub.next);
-    });
-  });
-
   describe('validateSearch', () => {
     it('should not continue when limit is negative', () => {
       const response = responseEvent();
@@ -331,7 +313,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData()
+          .message).to.equal('Only positive number is allowed for limit value');
       });
       Auth.validateSearch(request, response, stub.next);
     });
@@ -350,7 +333,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('Only positive number is allowed for offset value');
       });
       Auth.validateSearch(request, response, stub.next);
     });
@@ -372,7 +356,7 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to.equal('Title field is required');
       });
       Auth.validateDocumentsInput(request, response, stub.next);
     });
@@ -394,7 +378,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('Access type can only be public, private or role');
       });
       Auth.validateDocumentsInput(request, response, stub.next);
     });
@@ -429,7 +414,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('This document cannot be found');
       });
       Auth.getSingleDocument(request, response, stub.next);
     });
@@ -447,7 +433,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('You are not permitted to view this document');
       });
       Auth.getSingleDocument(request, response, stub.next);
     });
@@ -489,7 +476,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('This document does not exist');
       });
       Auth.hasDocumentPermission(request, response, stub.next);
     });
@@ -531,7 +519,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('You are not permitted to modify this role');
       });
       Auth.modifyRolePermission(request, response, stub.next);
     });
@@ -552,7 +541,8 @@ describe('MIDDLEWARE UNIT TEST', () => {
       };
       sinon.spy(stub, 'next');
       response.on('end', () => {
-        expect(response._getData().success).to.equal(false);
+        expect(response._getData().message).to
+          .equal('You are not permitted to modify this role');
       });
       Auth.modifyRolePermission(request, response, stub.next);
       done();

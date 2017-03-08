@@ -76,7 +76,6 @@ describe('DOCUMENT API', () => {
         .send(publicD)
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.success).to.equal(false);
           expect(res.body.message).to
             .equal('Please sign in or register to get a token');
           done();
