@@ -3,7 +3,7 @@ import request from 'supertest';
 import chai from 'chai';
 import app from '../../config/app';
 import db from '../../app/models';
-import helper from '../test.helper';
+import helper from '../helper/test.helper';
 
 const superRequest = request.agent(app);
 const expect = chai.expect;
@@ -427,7 +427,7 @@ describe('DOCUMENT API', () => {
           expect(res.status).to.equal(200);
           expect(res.body.pagination.page_count).to.equal(2);
           expect(res.body.pagination.page).to.equal(1);
-          expect(res.body.pagination.page_size).to.equal('4');
+          expect(res.body.pagination.page_size).to.equal(4);
           expect(res.body.pagination.total_count).to.equal(7);
           done();
         });

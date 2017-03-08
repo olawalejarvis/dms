@@ -1,6 +1,6 @@
 import chai from 'chai';
 import db from '../../app/models';
-import helper from '../test.helper';
+import helper from '../helper/test.helper';
 
 const expect = chai.expect;
 

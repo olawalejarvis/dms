@@ -2,7 +2,7 @@ import request from 'supertest';
 import chai from 'chai';
 import app from '../../config/app';
 import db from '../../app/models';
-import helper from '../test.helper';
+import helper from '../helper/test.helper';
 
 const superRequest = request.agent(app);
 const expect = chai.expect;
@@ -306,6 +306,19 @@ describe('User API', () => {
           });
       });
 
+      it('should return error when a user want to update id',
+      (done) => {
+        superRequest.put(`/users/${regularUser.id}`)
+          .send({ id: 10 })
+          .set({ 'x-access-token': regularToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(403);
+            expect(res.body.message)
+              .to.equal('You are not permitted to update your id');
+            done();
+          });
+      });
+
       it('should return not found for invalid user id', (done) => {
         const data = { username: 'wale', lastname: 'ala' };
         superRequest.put('/users/99999')
@@ -350,12 +363,13 @@ describe('User API', () => {
     });
 
     describe('Delete user DELETE /users/:id', () => {
-      let newUser;
+      let newUser, newUSerToken;
       before((done) => {
         superRequest.post('/users')
           .send(helper.thirdUser)
           .end((err, res) => {
             newUser = res.body.user;
+            newUSerToken = res.body.token;
             done();
           });
       });
@@ -391,6 +405,19 @@ describe('User API', () => {
             done();
           });
       });
+
+      it('should not allow a deleted user to access any restricted route',
+      (done) => {
+        superRequest.get('/users/')
+          .set({ 'x-access-token': newUSerToken })
+          .end((err, res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body.message).to
+              .equal('Account not found, Sign Up or sign in to get access');
+            done();
+          });
+      });
+
     });
 
     describe('SEARCH USERS PAGINATION', () => {

@@ -5,7 +5,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import supertest from 'supertest';
 import app from '../../config/app';
-import helper from '../test.helper';
+import helper from '../helper/test.helper';
 import db from '../../app/models';
 import Auth from '../../app/middlewares/Auth';
 

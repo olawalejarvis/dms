@@ -45,7 +45,7 @@ const Helper = {
     return {
       page_count: next,
       page: currentPage,
-      page_size: condition.limit,
+      page_size: Number(condition.limit),
       total_count: condition.count
     };
   },
