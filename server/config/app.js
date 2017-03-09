@@ -1,9 +1,9 @@
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
-import userRouter from './routes/UserRoute';
-import docRouter from './routes/DocumentRoute';
-import roleRouter from './routes/RoleRoute';
+import userRouter from './routes/User';
+import docRouter from './routes/Document';
+import roleRouter from './routes/Role';
 
 // Set up the express app
 const app = express();
@@ -22,5 +22,9 @@ app.get('/', (req, res) => {
 app.use('/users', userRouter);
 app.use('/documents', docRouter);
 app.use('/roles', roleRouter);
+
+app.get('*', (req, res) => {
+  res.status(404).send({ message: 'REQUEST PAGE NOT FOUND' });
+});
 
 export default app;

@@ -64,12 +64,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 2
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: false
     }
   }, {
     validate: {
       validatePassword() {
-        if (this.password.length !== null && (!(/\w+/g.test(this.password)) || (this.password.length < 8))) {
-          throw new Error('Minimum of of 8 characters is required');
+        if (this.password.length !== null && (!(/\w+/g.test(this.password))
+          || (this.password.length < 8))) {
+          throw new Error('Minimum of 8 characters is required');
         }
       }
     },

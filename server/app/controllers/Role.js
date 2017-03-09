@@ -1,6 +1,7 @@
 import db from '../models/index';
+import Helper from '../Helper/Helper';
 
-const roleCtrl = {
+const Role = {
 
   /**
     * Create a new role
@@ -13,9 +14,17 @@ const roleCtrl = {
     db.Role
       .create(req.body)
       .then((role) => {
-        res.status(200).send({ message: 'success', role });
+        res.status(201)
+          .send({
+            message: 'Role has been created',
+            role
+          });
       })
-      .catch(error => res.status(500).send(error.errors));
+      .catch(error =>
+        res.status(400)
+          .send({
+            errorArray: Helper.errorArray(error)
+          }));
   },
 
   /**
@@ -29,9 +38,12 @@ const roleCtrl = {
     db.Role
       .findAll()
       .then((roles) => {
-        res.status(200).send({ message: 'success', roles });
-      })
-      .catch(err => res.status(500).send(err.errors));
+        res.status(200)
+        .send({
+          message: 'You have successfully retrived all roles',
+          roles
+        });
+      });
   },
 
   /**
@@ -42,16 +54,19 @@ const roleCtrl = {
     * @returns {void} no returns
     */
   update(req, res) {
-    db.Role
-      .findById(req.params.id)
-      .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
-        role.update(req.body)
-        .then((updatedRole) => {
-          res.status(200).send({ message: 'success', updatedRole });
-        });
+    req.roleInstance.update(req.body)
+      .then((updatedRole) => {
+        res.status(200)
+          .send({
+            message: 'This role has been updated',
+            updatedRole
+          });
       })
-      .catch(err => res.status(500).send(err.errors));
+      .catch(error =>
+        res.status(400)
+          .send({
+            errorArray: Helper.errorArray(error)
+          }));
   },
 
   /**
@@ -62,16 +77,13 @@ const roleCtrl = {
     * @returns {void} no returns
     */
   delete(req, res) {
-    db.Role
-      .findById(req.params.id)
-      .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
-        role.destroy()
-        .then(() => {
-          res.status(200).send({ message: 'role deleted' });
-        });
-      })
-      .catch(err => res.status(500).send(err.errors));
+    req.roleInstance.destroy()
+      .then(() => {
+        res.status(200)
+          .send({
+            message: 'This role has been deleted'
+          });
+      });
   },
 
   /**
@@ -85,11 +97,19 @@ const roleCtrl = {
     db.Role
       .findById(req.params.id)
       .then((role) => {
-        if (!role) { return res.status(404).send({ message: 'role not found' }); }
-        res.status(200).send({ message: 'success', role });
-      })
-      .catch(err => res.status(500).send(err.errors));
+        if (!role) {
+          return res.status(404)
+            .send({
+              message: 'This role does not exist'
+            });
+        }
+        res.status(200)
+         .send({
+           message: 'This role has been retrieved successfully',
+           role
+         });
+      });
   }
 };
 
-export default roleCtrl;
+export default Role;

@@ -10,6 +10,7 @@ module.exports = {
         email: 'olawalequest@gmail.com',
         password: bcrypt.hashSync('password', bcrypt.genSaltSync(8)),
         roleId: '1',
+        active: false,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -20,6 +21,7 @@ module.exports = {
         email: 'pleroonigeria@gmail.com',
         password: bcrypt.hashSync('password', bcrypt.genSaltSync(8)),
         roleId: '2',
+        active: false,
         createdAt: new Date(),
         updatedAt: new Date()
       },
