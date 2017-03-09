@@ -1,46 +1,30 @@
-CREATE TABLE public."Roles"
-(
-  "id" integer NOT NULL DEFAULT nextval('"Roles_id_seq"'::regclass),
-  "title" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+CREATE TABLE "Roles" (
+  id integer NOT NULL,
+  title character varying(255),
   "createdAt" timestamp with time zone NOT NULL,
-  "updatedAt" timestamp with time zone NOT NULL,
-  CONSTRAINT "Roles_pkey" PRIMARY KEY (id),
-  CONSTRAINT "Roles_title_key" UNIQUE (title)
-)
+  "updatedAt" timestamp with time zone NOT NULL
+);
 
-CREATE TABLE public."Users"
-(
-  "id" integer NOT NULL DEFAULT nextval('"Users_id_seq"'::regclass),
-  "username" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "firstname" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "lastname" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "password" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "roleId" integer NOT NULL,
-  "email" character varying(255) COLLATE pg_catalog."default",
+CREATE TABLE "Users" (
+  id integer NOT NULL,
+  username character varying(255),
+  firstname character varying(255),
+  lastname character varying(255),
+  email character varying(255),
+  password character varying(255),
+  "roleId" integer,
+  active boolean NOT NULL,
   "createdAt" timestamp with time zone NOT NULL,
-  "updatedAt" timestamp with time zone NOT NULL,
-  CONSTRAINT "Users_pkey" PRIMARY KEY (id),
-  CONSTRAINT "Users_email_key" UNIQUE (email),
-  CONSTRAINT "Users_username_key" UNIQUE (username),
-  CONSTRAINT "Users_roleId_fkey" FOREIGN KEY ("roleId")
-      REFERENCES public."Roles" (id) MATCH SIMPLE
-      ON UPDATE CASCADE
-      ON DELETE CASCADE
-)
+  "updatedAt" timestamp with time zone NOT NULL
+);
 
-CREATE TABLE public."Documents"
-(
-  "id" integer NOT NULL DEFAULT nextval('"Documents_id_seq"'::regclass),
-  "title" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "content" text COLLATE pg_catalog."default" NOT NULL,
-  "access" character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  "ownerId" integer NOT NULL,
-  "ownerRoleId" integer NOT NULL,
+CREATE TABLE "Documents" (
+  id integer NOT NULL,
+  "ownerId" integer,
+  "ownerRoleId" integer,
+  access character varying(255) DEFAULT 'public'::character varying NOT NULL,
+  title character varying(255) NOT NULL,
+  content text NOT NULL,
   "createdAt" timestamp with time zone NOT NULL,
-  "updatedAt" timestamp with time zone NOT NULL,
-  CONSTRAINT "Documents_pkey" PRIMARY KEY (id),
-  CONSTRAINT "Documents_ownerId_fkey" FOREIGN KEY ("ownerId")
-      REFERENCES public."Users" (id) MATCH SIMPLE
-      ON UPDATE CASCADE
-      ON DELETE NO ACTION
-)
+  "updatedAt" timestamp with time zone NOT NULL
+);

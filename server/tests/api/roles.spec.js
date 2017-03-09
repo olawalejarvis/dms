@@ -9,8 +9,8 @@ const superRequest = request.agent(app);
 const expect = chai.expect;
 
 const adminParams = helper.firstUser;
-const adminRoleParams = helper.testRoleA;
-const regularRoleParams = helper.testRoleR;
+const adminRoleParams = helper.adminRole;
+const regularRoleParams = helper.regularRole;
 
 let adminToken, reguToken;
 let role;
@@ -73,7 +73,7 @@ describe('ROLE API', () => {
     it('should return varification failed when no token is supplied',
     (done) => {
       superRequest.post('/roles')
-        .send(helper.testRoleG)
+        .send(helper.guestRole1)
         .end((err, res) => {
           expect(res.status).to.equal(400);
           expect(res.body.message).to
@@ -88,7 +88,7 @@ describe('ROLE API', () => {
         .end((err, res) => {
           reguToken = res.body.token;
           superRequest.post('/roles')
-            .send(helper.testRoleSample)
+            .send(helper.sampleRole)
             .set({ 'x-access-token': reguToken })
             .end((er, re) => {
               expect(re.status).to.equal(403);
@@ -103,7 +103,7 @@ describe('ROLE API', () => {
   describe('DELETE ROLE, DELETE /roles', () => {
     before((done) => {
       superRequest.post('/roles')
-        .send(helper.testRoleG)
+        .send(helper.guestRole1)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           role = res.body.role;
@@ -160,7 +160,7 @@ describe('ROLE API', () => {
   describe('GET BY ID', () => {
     before((done) => {
       superRequest.post('/roles')
-        .send(helper.testRoleG1)
+        .send(helper.guestRole2)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           role = res.body.role;
@@ -206,7 +206,7 @@ describe('ROLE API', () => {
     let newRole;
     before((done) => {
       superRequest.post('/roles')
-        .send(helper.testRoleG2)
+        .send(helper.guestRole3)
         .set({ 'x-access-token': adminToken })
         .end((err, res) => {
           newRole = res.body.role;
@@ -279,7 +279,7 @@ describe('ROLE API', () => {
   describe('GET ALL ROLES GET /roles', () => {
     before((done) => {
       superRequest.post('/roles')
-        .send(helper.testRoleG2)
+        .send(helper.guestRole1)
         .set({ 'x-access-token': adminToken });
       done();
     });

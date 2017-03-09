@@ -13,11 +13,11 @@ describe('ROLE', () => {
 
   describe('Create Role', () => {
     it('should create a role', (done) => {
-      db.Role.create(helper.testRoleG)
+      db.Role.create(helper.guestRole1)
         .then((role) => {
           guestRole = role.dataValues;
-          expect(role.dataValues.title).to.equal(helper.testRoleG.title);
-          expect(role.dataValues.id).to.equal(helper.testRoleG.id);
+          expect(role.dataValues.title).to.equal(helper.guestRole1.title);
+          expect(role.dataValues.id).to.equal(helper.guestRole1.id);
           done();
         });
     });

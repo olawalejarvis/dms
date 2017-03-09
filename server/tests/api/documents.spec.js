@@ -17,15 +17,12 @@ const compareDates = (firstDate, secondDate) =>
 
 describe('DOCUMENT API', () => {
   let adminToken, regularToken, regularToken2;
-
   let regularUser, regularUser2;
-
   let createdDoc, roleDocument, publicDocument, privateDocument;
-
   let document, updateDoc;
 
   before((done) => {
-    db.Role.bulkCreate([helper.testRoleA, helper.testRoleR])
+    db.Role.bulkCreate([helper.adminRole, helper.regularRole])
       .then((roles) => {
         helper.adminUser.roleId = roles[0].id;
         db.User.create(helper.adminUser)
@@ -345,7 +342,7 @@ describe('DOCUMENT API', () => {
     describe('ROLE ACCESS DOCUMENT', () => {
       let guestToken;
       before((done) => {
-        db.Role.create(helper.testRoleG)
+        db.Role.create(helper.guestRole1)
           .then((guestRole) => {
             helper.secondUser.roleId = guestRole.id;
             superRequest.post('/users')

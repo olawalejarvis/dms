@@ -409,7 +409,6 @@ describe('User API', () => {
             done();
           });
       });
-
     });
 
     describe('SEARCH USERS PAGINATION', () => {

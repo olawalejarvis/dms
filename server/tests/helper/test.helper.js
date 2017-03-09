@@ -1,28 +1,28 @@
 import faker from 'faker';
 
 const helper = {
-  testRoleA: {
+  adminRole: {
     id: 1,
     title: 'admin'
   },
-  testRoleR: {
+  regularRole: {
     id: 2,
     title: 'regular'
   },
-  testRoleG: {
+  guestRole1: {
     id: 3,
     title: 'guest'
   },
-  testRoleG1: {
+  guestRole2: {
     id: 4,
     title: 'guest111'
   },
-  testRoleG2: {
+  guestRole3: {
     id: 5,
     title: 'guest2'
   },
-  testRoleSample: {
-    id: 7,
+  sampleRole: {
+    id: 6,
     title: 'guestSample'
   },
   adminUser: {
@@ -116,7 +116,7 @@ const helper = {
     content: faker.lorem.paragraph(),
     access: 'role'
   },
-  testDocument4: {
+  testDocument: {
     title: faker.company.catchPhrase(),
     content: faker.lorem.paragraph(),
   }
