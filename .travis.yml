@@ -2,5 +2,20 @@ language: node_js
 node_js:
 - "stable"
 
+before_install:
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
+services:
+  - postgresql
+
+script:
+  - npm test
+
 after_success:
-- npm run coveralls
+  - npm run coveralls
+
+addons:
+  postgresql: "9.3"
+  

@@ -4,3 +4,6 @@ node_modules
 .coveralls.yml
 coverage
 .env
+.vscode
+.nyc_output
+dist
