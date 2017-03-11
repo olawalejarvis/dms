@@ -130,23 +130,23 @@ const User = {
     * @returns {void|Response} response object or void
     */
   update(req, res) {
-    const errorArray = [];
     req.userInstance.update(req.body)
-      .then(updatedUser =>
+      .then((updatedUser) => {
+        if (req.body.roleId) {
+          db.Document.update({ ownerRoleId: req.body.roleId },
+            { where: { ownerId: updatedUser.id } });
+        }
         res.status(200)
           .send({
             message: 'Your profile has been updated',
             updatedUser
-          }))
-      .catch((err) => {
-        err.errors.forEach((error) => {
-          errorArray.push({ path: error.path, message: error.message });
-        });
-        return res.status(400)
-          .send({
-            errorArray
           });
-      });
+      })
+      .catch(err =>
+        res.status(400)
+          .send({
+            errorArray: Helper.errorArray(err)
+          }));
   },
 
   /**
