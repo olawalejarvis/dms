@@ -11,6 +11,7 @@ module.exports = {
         password: bcrypt.hashSync('password', bcrypt.genSaltSync(8)),
         roleId: '1',
         active: false,
+        disable: false,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -22,6 +23,7 @@ module.exports = {
         password: bcrypt.hashSync('password', bcrypt.genSaltSync(8)),
         roleId: '2',
         active: false,
+        disable: false,
         createdAt: new Date(),
         updatedAt: new Date()
       },
