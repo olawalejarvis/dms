@@ -127,8 +127,34 @@ const Document = {
             pagination
           });
       });
-  }
-
+  },
+  /**
+    * Public document
+    * Route: GET: documents/publics
+    * @param {Object} req request object
+    * @param {Object} res response object
+    * @returns {void|Response} response object or void
+    */
+  public(req, res) {
+    req.dmsFilter.attributes = Helper.getDocAttribute();
+    db.Document
+      .findAndCountAll(req.dmsFilter)
+      .then((documents) => {
+        const condition = {
+          count: documents.count,
+          limit: req.dmsFilter.limit,
+          offset: req.dmsFilter.offset
+        };
+        delete documents.count;
+        const pagination = Helper.pagination(condition);
+        res.status(200)
+          .send({
+            message: 'Public documents successfully retrieved',
+            documents,
+            pagination
+          });
+      });
+  },
 };
 
 export default Document;
