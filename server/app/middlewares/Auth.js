@@ -82,12 +82,24 @@ const Auth = {
    * @returns {void|Object} response object or void
    * */
   validateUserInput(req, res, next) {
-    if (req.body.roleId && req.body.roleId === 1) {
-      return res.status(403)
-        .send({
-          message: 'Permission denied, You cannot sign up as an admin user'
-        });
+    let roleId = 2;
+    if (req.body.roleId) {
+      if (!Helper.isAdmin(req.tokenDecode.roleId)) {
+        return res.status(403)
+          .send({
+            message: 'Permission denied, You cannot sign up as an admin user',
+            response: 'Default role is regular'
+          });
+      }
+      if (!Number(roleId)) {
+        return res.status(400).send({ message: 'Role Id only accept number' });
+      }
+      if (!Helper.checkRole(req.body.roleId)) {
+        return res.status(404).send({ message: 'Role does not exist' });
+      }
+      roleId = req.body.roleId;
     }
+
     let username = /\w+/g.test(req.body.username);
     let firstname = /\w+/g.test(req.body.firstname);
     let lastname = /\w+/g.test(req.body.lastname);
@@ -152,7 +164,6 @@ const Auth = {
             lastname = req.body.lastname;
             email = req.body.email;
             password = req.body.password;
-            const roleId = req.body.roleId || 2;
             req.userInput =
             { username, firstname, lastname, roleId, email, password };
             next();
@@ -205,6 +216,9 @@ const Auth = {
           message: 'You are not permitted to update this profile'
         });
     }
+    if (req.body.roleId && !Number(req.body.roleId)) {
+      return res.status(400).send({ message: 'Role Id only accept numbers' });
+    }
     if (!!req.body.roleId && req.body.roleId === '1') {
       if (!Helper.isAdmin(req.tokenDecode.roleId)) {
         return res.status(403)
@@ -227,8 +241,22 @@ const Auth = {
               message: 'This user does not exist'
             });
         }
-        req.userInstance = user;
-        next();
+        if (req.body.roleId) {
+          db.Role.findById(req.body.roleId)
+            .then((ro) => {
+              if (!ro) {
+                return res.status(404)
+                  .send({
+                    message: 'Role Id not found, Please use a valid role id'
+                  });
+              }
+              req.userInstance = user;
+              next();
+            });
+        } else {
+          req.userInstance = user;
+          next();
+        }
       });
   },
  /**
@@ -371,6 +399,12 @@ const Auth = {
         query.where = Helper.docAccess(req);
       }
     }
+    if (`${req.baseUrl}${req.route.path}` === '/documents/public') {
+      const publicQuery = Helper.likeSearch(terms);
+      publicQuery.$and = [{ access: 'public' }];
+      const publicSearch = req.query.query ? publicQuery : { access: 'public' };
+      query.where = publicSearch;
+    }
     if (`${req.baseUrl}${req.route.path}` === '/users/:id/documents') {
       const adminSearch = req.query.query ? Helper.likeSearch(terms) : { };
       const userSearch = req.query.query
@@ -433,7 +467,20 @@ const Auth = {
       access: req.body.access,
       ownerRoleId: req.tokenDecode.roleId
     };
-    next();
+    db.Document.findOne({ where: {
+      $and: [{ title: req.body.title }, { content: req.body.content }]
+    } })
+    .then((foundDocument) => {
+      if (!foundDocument) {
+        next();
+      } else {
+        return res.status(406)
+          .send({
+            message: 'Document already exist',
+            foundDocument
+          });
+      }
+    });
   },
  /**
    * Get a single user's document

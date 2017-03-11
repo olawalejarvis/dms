@@ -1,3 +1,4 @@
+import db from '../models/index';
 /**
   * Controller's' helper
   */
@@ -195,6 +196,15 @@ const Helper = {
     return (doc.access === 'role'
       && doc.ownerRoleId === req.tokenDecode.roleId);
   },
+  checkRole(roleId) {
+    return db.Role.findById(roleId)
+      .then((role) => {
+        if (!role) {
+          return false;
+        }
+        return true;
+      });
+  }
 
 };
 
