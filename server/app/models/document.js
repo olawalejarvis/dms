@@ -38,7 +38,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     ownerRoleId: {
       type: DataTypes.STRING
-    }
+    },
+    disable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
   }, {
     classMethods: {
       associate: (models) => {
