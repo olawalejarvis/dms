@@ -155,6 +155,25 @@ const Document = {
           });
       });
   },
+  getDisableDocument(req, res) {
+    db.Document.findAndCountAll({ where: { disable: true } })
+      .then((disable) => {
+        const condition = {
+          count: disable.count,
+          limit: req.dmsFilter.limit,
+          offset: req.dmsFilter.offset
+        };
+        delete disable.count;
+        const pagination = Helper.pagination(condition);
+        res.status(200)
+          .send({
+            message: 'Disable documents successfully retrieved',
+            disable,
+            pagination
+          });
+      })
+      .catch(error => res.status(500).send(error.errors));
+  }
 };
 
 export default Document;

@@ -136,6 +136,10 @@ const User = {
           db.Document.update({ ownerRoleId: req.body.roleId },
             { where: { ownerId: updatedUser.id } });
         }
+        if (req.body.disable) {
+          db.Document.update({ disable: req.body.disable },
+          { where: { ownerId: updatedUser.id } });
+        }
         res.status(200)
           .send({
             message: 'Your profile has been updated',
@@ -184,6 +188,10 @@ const User = {
               message: 'This user does not exist'
             });
         }
+        if (user.disable) {
+          return res.status(400)
+            .send({ message: 'This account has been disable' });
+        }
         userDocuments.user = Helper.getUserProfile(user);
         req.dmsFilter.where.ownerId = req.params.id;
         req.dmsFilter.attributes = Helper.getDocAttribute();
@@ -231,6 +239,24 @@ const User = {
           .send({
             message: 'Your search was successful',
             users,
+            pagination
+          });
+      });
+  },
+  getDisableUser(req, res) {
+    db.User.findAndCountAll({ where: { disable: true } })
+      .then((user) => {
+        const condition = {
+          count: user.count,
+          limit: req.dmsFilter.limit,
+          offset: req.dmsFilter.offset
+        };
+        delete user.count;
+        const pagination = Helper.pagination(condition);
+        return res.status(200)
+          .send({
+            message: 'Disable users has been successfully retrieved',
+            user,
             pagination
           });
       });
