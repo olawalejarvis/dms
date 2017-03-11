@@ -34,6 +34,12 @@ const Auth = {
                   message: 'Account not found, Sign Up or sign in to get access'
                 });
             }
+            if (user.disable) {
+              return res.status(403)
+                .send({
+                  message: 'Your account has been disable, contact the admin'
+                });
+            }
             if (!user.active) {
               return res.status(401)
                 .send({
@@ -216,17 +222,6 @@ const Auth = {
           message: 'You are not permitted to update this profile'
         });
     }
-    if (req.body.roleId && !Number(req.body.roleId)) {
-      return res.status(400).send({ message: 'Role Id only accept numbers' });
-    }
-    if (!!req.body.roleId && req.body.roleId === '1') {
-      if (!Helper.isAdmin(req.tokenDecode.roleId)) {
-        return res.status(403)
-          .send({
-            message: 'You are not permitted to update role to admin'
-          });
-      }
-    }
     if (req.body.id) {
       return res.status(403)
         .send({
@@ -242,21 +237,29 @@ const Auth = {
             });
         }
         if (req.body.roleId) {
-          db.Role.findById(req.body.roleId)
-            .then((ro) => {
-              if (!ro) {
-                return res.status(404)
-                  .send({
-                    message: 'Role Id not found, Please use a valid role id'
-                  });
-              }
-              req.userInstance = user;
-              next();
-            });
-        } else {
-          req.userInstance = user;
-          next();
+          if (!Helper.checkRole(req.body.roleId)) {
+            return res.status(404)
+              .send({
+                message: 'Role Id not found, Please use a valid role id'
+              });
+          }
+          if (!Helper.isAdmin(req.tokenDecode.roleId)) {
+            return res.status(403)
+              .send({
+                message: 'You are not permitted to update role'
+              });
+          }
+          if (req.body.disable) {
+            if (!Helper.isAdmin(req.tokenDecode.roleId)) {
+              return res.status(403)
+                .send({
+                  message: 'You are not permitted to disable a user'
+                });
+            }
+          }
         }
+        req.userInstance = user;
+        next();
       });
   },
  /**
@@ -277,6 +280,10 @@ const Auth = {
             .send({
               message: 'This user does not exist'
             });
+        }
+        if (user.disable) {
+          return res.status(400)
+            .send({ message: 'This account has been disable' });
         }
         req.getUser = user;
         next();
@@ -364,17 +371,22 @@ const Auth = {
           });
       }
       query.where = {
-        $or: [
-          { username: { $iLike: { $any: terms } } },
-          { firstname: { $iLike: { $any: terms } } },
-          { lastname: { $iLike: { $any: terms } } },
-          { email: { $iLike: { $any: terms } } }
+        $and: [
+          { disable: false },
+          {
+            $or: [
+              { username: { $iLike: { $any: terms } } },
+              { firstname: { $iLike: { $any: terms } } },
+              { lastname: { $iLike: { $any: terms } } },
+              { email: { $iLike: { $any: terms } } }
+            ]
+          }
         ]
       };
     }
     if (`${req.baseUrl}${req.route.path}` === '/users/') {
       query.where = Helper.isAdmin(req.tokenDecode.roleId)
-        ? {}
+        ? { disable: false }
         : { id: req.tokenDecode.userId };
     }
     if (`${req.baseUrl}${req.route.path}` === '/documents/search') {
@@ -385,31 +397,35 @@ const Auth = {
           });
       }
       if (Helper.isAdmin(req.tokenDecode.roleId)) {
-        query.where = Helper.likeSearch(terms);
+        query.where = { $and: [{ disable: false }, Helper.likeSearch(terms)] };
       } else {
         query.where = {
-          $and: [Helper.docAccess(req), Helper.likeSearch(terms)]
+          $and: [{ disable: false },
+            Helper.docAccess(req), Helper.likeSearch(terms)]
         };
       }
     }
     if (`${req.baseUrl}${req.route.path}` === '/documents/') {
       if (Helper.isAdmin(req.tokenDecode.roleId)) {
-        query.where = {};
+        query.where = { disable: false };
       } else {
-        query.where = Helper.docAccess(req);
+        query.where = { $and: [{ disable: false }, Helper.docAccess(req)] };
       }
     }
     if (`${req.baseUrl}${req.route.path}` === '/documents/public') {
       const publicQuery = Helper.likeSearch(terms);
-      publicQuery.$and = [{ access: 'public' }];
-      const publicSearch = req.query.query ? publicQuery : { access: 'public' };
+      publicQuery.$and = [{ disable: false }, { access: 'public' }];
+      const publicSearch = req.query.query
+      ? publicQuery : { $and: [{ disable: false }, { access: 'public' }] };
       query.where = publicSearch;
     }
     if (`${req.baseUrl}${req.route.path}` === '/users/:id/documents') {
-      const adminSearch = req.query.query ? Helper.likeSearch(terms) : { };
+      const adminSearch = req.query.query
+      ? { $and: [{ disable: false }, Helper.likeSearch(terms)] }
+      : { disable: false };
       const userSearch = req.query.query
-        ? [Helper.docAccess(req), Helper.likeSearch(terms)]
-        : Helper.docAccess(req);
+        ? [{ disable: false }, Helper.docAccess(req), Helper.likeSearch(terms)]
+        : { $and: [{ disable: false }, Helper.docAccess(req)] };
       if (Helper.isAdmin(req.tokenDecode.roleId)) {
         query.where = adminSearch;
       } else {
@@ -505,6 +521,12 @@ const Auth = {
           return res.status(401)
             .send({
               message: 'You are not permitted to view this document'
+            });
+        }
+        if (document.disable) {
+          return res.status(400)
+            .send({
+              message: 'This document has been disable'
             });
         }
         req.singleDocument = document;
