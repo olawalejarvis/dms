@@ -17,6 +17,10 @@ docRouter.get('/search',
   Auth.validateSearch,
   Document.search);
 
+docRouter.get('/public',
+  Auth.validateSearch,
+  Document.public);
+
 docRouter.route('/:id')
   .get(Auth.verifyToken,
     Auth.getSingleDocument,
