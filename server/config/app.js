@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import userRouter from './routes/User';
 import docRouter from './routes/Document';
 import roleRouter from './routes/Role';
+import adminRouter from './routes/Admin';
 
 // Set up the express app
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/users', userRouter);
 app.use('/documents', docRouter);
 app.use('/roles', roleRouter);
+app.use('/admin', adminRouter);
 
 app.get('*', (req, res) => {
   res.status(404).send({ message: 'REQUEST PAGE NOT FOUND' });

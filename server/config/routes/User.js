@@ -11,17 +11,6 @@ userRouter.route('/')
   .post(Auth.validateUserInput,
     User.create);
 
-// admin create/get users route
-userRouter.route('/admin/user')
-  .get(Auth.verifyToken,
-  Auth.hasAdminPermission,
-  Auth.validateSearch,
-  User.getAll)
-  .post(Auth.verifyToken,
-  Auth.hasAdminPermission,
-  Auth.validateUserInput,
-  User.create);
-
 userRouter.route('/login')
   .post(Auth.validateLoginInput, User.login);
 
