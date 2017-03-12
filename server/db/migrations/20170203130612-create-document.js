@@ -35,6 +35,14 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false
       },
+      type: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        references: {
+          model: 'Types',
+          key: 'title'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
