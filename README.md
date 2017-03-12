@@ -27,9 +27,15 @@ A created user will have a role, either an admin or a regular.
     - View public documents created by other users.
     - View documents created by his access group with access level set as `role`.
     - Search documents.
+    - Disable a document
+    - Enable a document
+    - Add type to document
+    - Fetch all documents that belong to particular type
+    - Search documents by type
     - View `public` and `role` access level documents of other regular users.
 
 - An Admin User can:
+    - Create a user
     - View all users
     - View all created documents
     - Delete any user
@@ -38,6 +44,13 @@ A created user will have a role, either an admin or a regular.
     - View all created roles
     - Search for any user
     - Search for any document
+    - Disable a user
+    - Disable documents
+    - View all disable users
+    - View all disable documents
+    - Create document's type
+    - Delete documents type
+    - view all documents type
 
 **Documents**:
 Documents can be created and must have:
@@ -45,6 +58,7 @@ Documents can be created and must have:
   - Title
   - Content
   - Access (`private, public or role`)
+  - Type
 
 **Roles**:
 Roles can also be created, the default roles are `admin` and `regular`.
@@ -68,8 +82,9 @@ PUT | [/users/:id](#edit-user) | Edit user details
 DELETE | [/users/:id](#delete-user) | Remove a user from storage
 GET | [/users/login](#login) | To log a user in
 GET | [/users/logout](#logout) | To log a user out
-GET | [/users/search](#search-user) | To search for a user
+GET | [/users/search?query=ol&limit=10&offset=0](#search-user) | To search for a user
 GET | [/users/:id/documents](#user-documents) | Retrieve all documents created by a user
+GET | [/users/:id/documents?query=ola&limit=10&offset=0](#search-user-documents) | Search user's document
 
 **Roles**
 
@@ -88,9 +103,31 @@ Request type | Endpoint | Action
 POST | [/documents](#create-document) | Create a new document
 GET | [/documents](#get-all-documents) | Retrieve all documents
 GET | [/documents/:id](#get-document) | Retrieve a specific document
-GET | [/documents?query=new](#search-document) | Search documents using key terms
+GET | [/documents/search?query=new&limit=10&offset=0](#search-document) | Search documents using key terms
 PUT | [/documents/:id](#edit-document) | Update a specific document
 DELETE | [/documents/:id](#delete-document) | Remove a specific document from storage
+
+**Types**
+
+Request type | Endpoint | Action
+------------ | -------- | ------
+POST | [/types](#create-type) | Create a new type
+GET | [/types](#get-all-types) | Get all created types
+GET | [/types/:id](#get-type) | Get a specific type
+GET | [/types/:title/documents](#get-type-documents) | Get all documents belonging to a specific types
+GET | [/types/:title/documents?query=ola&limit=10&offset=0](#search-type-documents) | search type document
+PUT | [/types/:id](#edit-type) | Edit a specific type
+DELETE | [/types/:id](#delete-type) | Delete a specific type
+
+**ADMIN**
+
+Request type | Endpoint | Action
+------------ | -------- | ------
+POST | [/admin/users](#create-user) | Create a new user
+GET | [/admin/users](#get-all-users) | Get all users
+GET | [/admin/disable/users](#get-disable-users) | Get all disable users
+PUT | [/admin/disable/documents](#get-disable-documensts) | Get all disable documents
+DELETE | [/role/:id](#delete-role) | Delete a specific role
 
 The following are some sample request and response from the API.
 
