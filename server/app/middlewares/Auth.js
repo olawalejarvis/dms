@@ -354,6 +354,7 @@ const Auth = {
         });
     }
 
+    // make search query an array
     if (searchArray) {
       searchArray.forEach((word) => {
         terms.push(`%${word}%`);
@@ -363,6 +364,7 @@ const Auth = {
     query.offset = offset;
     query.order = [['createdAt', order]];
 
+    // search all users
     if (`${req.baseUrl}${req.route.path}` === '/users/search') {
       if (!req.query.query) {
         return res.status(400)
@@ -384,11 +386,15 @@ const Auth = {
         ]
       };
     }
+
+    // get all users
     if (`${req.baseUrl}${req.route.path}` === '/users/') {
       query.where = Helper.isAdmin(req.tokenDecode.roleId)
         ? { disable: false }
         : { id: req.tokenDecode.userId };
     }
+
+    // search all documents
     if (`${req.baseUrl}${req.route.path}` === '/documents/search') {
       if (!req.query.query) {
         return res.status(400)
@@ -405,6 +411,8 @@ const Auth = {
         };
       }
     }
+
+    // get all documents
     if (`${req.baseUrl}${req.route.path}` === '/documents/') {
       if (Helper.isAdmin(req.tokenDecode.roleId)) {
         query.where = { disable: false };
@@ -412,13 +420,18 @@ const Auth = {
         query.where = { $and: [{ disable: false }, Helper.docAccess(req)] };
       }
     }
+
+    // get and search all public ducuments
     if (`${req.baseUrl}${req.route.path}` === '/documents/public') {
       const publicQuery = Helper.likeSearch(terms);
       publicQuery.$and = [{ disable: false }, { access: 'public' }];
+
       const publicSearch = req.query.query
       ? publicQuery : { $and: [{ disable: false }, { access: 'public' }] };
       query.where = publicSearch;
     }
+
+    // search all documents belonging to a particular user
     if (`${req.baseUrl}${req.route.path}` === '/users/:id/documents') {
       const adminSearch = req.query.query
       ? { $and: [{ disable: false }, Helper.likeSearch(terms)] }
@@ -426,6 +439,26 @@ const Auth = {
       const userSearch = req.query.query
         ? [{ disable: false }, Helper.docAccess(req), Helper.likeSearch(terms)]
         : { $and: [{ disable: false }, Helper.docAccess(req)] };
+      if (Helper.isAdmin(req.tokenDecode.roleId)) {
+        query.where = adminSearch;
+      } else {
+        query.where = userSearch;
+      }
+    }
+
+    // search all document belonging to a speific type
+    if (`${req.baseUrl}${req.route.path}` === '/types/:title/documents') {
+      const adminSearch = req.query.query
+      ? { $and: [{ disable: false },
+      { type: req.params.title }, Helper.likeSearch(terms)] }
+      : { $and: [{ disable: false }, { type: req.params.title }] };
+
+      const userSearch = req.query.query
+        ? [{ disable: false }, { type: req.params.title },
+          Helper.docAccess(req), Helper.likeSearch(terms)]
+        : { $and: [{ disable: false }, { type: req.params.title },
+          Helper.docAccess(req)] };
+
       if (Helper.isAdmin(req.tokenDecode.roleId)) {
         query.where = adminSearch;
       } else {
@@ -445,6 +478,7 @@ const Auth = {
   validateDocumentsInput(req, res, next) {
     const title = /\w+/g.test(req.body.title);
     const content = /\w+/g.test(req.body.content);
+    const type = req.body.type || 1;
     if (!req.body.title) {
       return res.status(400)
         .send({
@@ -481,10 +515,15 @@ const Auth = {
       content: req.body.content,
       ownerId: req.tokenDecode.userId,
       access: req.body.access,
-      ownerRoleId: req.tokenDecode.roleId
+      ownerRoleId: req.tokenDecode.roleId,
+      type
     };
     db.Document.findOne({ where: {
-      $and: [{ title: req.body.title }, { content: req.body.content }]
+      $and: [
+        { title: req.body.title },
+        { content: req.body.content },
+        { ownerId: req.tokenDecode.userId }
+      ]
     } })
     .then((foundDocument) => {
       if (!foundDocument) {

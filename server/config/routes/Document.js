@@ -1,5 +1,5 @@
 import express from 'express';
-import Document from './../../app/controllers/Document';
+import { Document } from './../../app/controllers';
 import Auth from '../../app/middlewares/Auth';
 
 const docRouter = express.Router();

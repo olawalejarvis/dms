@@ -44,12 +44,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false
     },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   }, {
     classMethods: {
       associate: (models) => {
         Document.belongsTo(models.User, {
           foreignKey: 'ownerId',
           onDelete: 'CASCADE',
+        });
+        Document.belongsTo(models.Type, {
+          foreignKey: 'type'
         });
       }
     }

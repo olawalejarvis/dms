@@ -1,5 +1,5 @@
 import express from 'express';
-import Role from './../../app/controllers/Role';
+import { Role } from './../../app/controllers';
 import Auth from '../../app/middlewares/Auth';
 
 const roleRouter = express.Router();
