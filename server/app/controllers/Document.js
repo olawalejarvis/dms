@@ -155,6 +155,13 @@ const Document = {
           });
       });
   },
+  /**
+    * Disable document
+    * Route: GET: admin/disable/documents
+    * @param {Object} req request object
+    * @param {Object} res response object
+    * @returns {void|Response} response object or void
+    */
   getDisableDocument(req, res) {
     db.Document.findAndCountAll({ where: { disable: true } })
       .then((disable) => {

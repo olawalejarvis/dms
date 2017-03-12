@@ -243,6 +243,13 @@ const User = {
           });
       });
   },
+  /**
+    * Get disable users
+    * Route: GET: admin/users/disable
+    * @param {Object} req request object
+    * @param {Object} res response object
+    * @returns {void|Response} response object or void
+    */
   getDisableUser(req, res) {
     db.User.findAndCountAll({ where: { disable: true } })
       .then((user) => {

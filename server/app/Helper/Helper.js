@@ -75,6 +75,7 @@ const Helper = {
       'id',
       'title',
       'content',
+      'type',
       'access',
       'ownerId',
       'createdAt',
@@ -103,6 +104,7 @@ const Helper = {
       id: data.id,
       title: data.title,
       content: data.content,
+      type: data.type,
       access: data.access,
       ownerId: data.ownerId,
       createdAt: data.createdAt,
@@ -196,6 +198,11 @@ const Helper = {
     return (doc.access === 'role'
       && doc.ownerRoleId === req.tokenDecode.roleId);
   },
+  /**
+   * Check if role exist
+   * @param {String} roleId string
+   * @returns {Boolean} true or false
+   */
   checkRole(roleId) {
     return db.Role.findById(roleId)
       .then((role) => {
