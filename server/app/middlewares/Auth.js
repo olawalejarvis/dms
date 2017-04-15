@@ -390,7 +390,7 @@ const Auth = {
     // get all users
     if (`${req.baseUrl}${req.route.path}` === '/users/') {
       query.where = Helper.isAdmin(req.tokenDecode.roleId)
-        ? { disable: false }
+        ? { }
         : { id: req.tokenDecode.userId };
     }
 
