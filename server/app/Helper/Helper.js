@@ -18,7 +18,8 @@ const Helper = {
       email: data.email,
       roleId: data.roleId,
       createAt: data.createdAt,
-      updatedAt: data.updatedAt
+      updatedAt: data.updatedAt,
+      about: data.about
     };
   },
   /**
@@ -33,6 +34,8 @@ const Helper = {
       'lastname',
       'email',
       'createdAt',
+      'roleId',
+      'about'
     ];
   },
   /**
@@ -64,6 +67,8 @@ const Helper = {
       firstname: data.firstname,
       lastname: data.lastname,
       email: data.email,
+      roleId: data.roleId,
+      about: data.about
     };
   },
   /**

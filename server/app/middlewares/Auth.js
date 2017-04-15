@@ -200,6 +200,15 @@ const Auth = {
           message: 'Please enter a valid email and password'
         });
     }
+    db.User.findOne({ where: { email: req.body.email } })
+      .then((user) => {
+        if (!user) {
+          return res.status(400).send({ message: 'Please enter a valid email or passowrd' });
+        }
+        if (user.disable) {
+          return res.status(400).send({ message: 'This account has been disable' });
+        }
+      });
     next();
   },
   /**

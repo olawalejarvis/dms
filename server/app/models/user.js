@@ -74,7 +74,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
-    }
+    },
+    about: {
+      type: DataTypes.TEXT,
+    },
   }, {
     validate: {
       validatePassword() {
