@@ -1,11 +1,13 @@
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import * as Route from './routes/';
 
 // Set up the express app
 const app = express();
 
+app.use(cors());
 // Log requests to the console.
 app.use(logger('dev'));
 
